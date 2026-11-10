@@ -9,6 +9,7 @@
     constructor(host) {
       this.host = host;
       this.input = null;
+      this.side = 'right';
       this.panel = document.createElement('section');
       this.panel.className = 'fp-keyboard';
       this.panel.hidden = true;
@@ -16,11 +17,17 @@
       this.panel.setAttribute('aria-label', 'On-screen keyboard');
       this.panel.addEventListener('pointerdown', event => {
         if (event.target.closest('button')) event.preventDefault();
+        else if (event.target.closest('.fp-keyboard-header')) this.startDrag(event);
       });
       this.panel.addEventListener('click', event => {
         const button = event.target.closest('button[data-key]');
         if (button && !button.disabled) this.press(button.dataset.key);
       });
+      this.panel.addEventListener('pointermove', event => this.moveDrag(event));
+      this.panel.addEventListener('pointerup', event => this.endDrag(event));
+      this.panel.addEventListener('pointercancel', event => this.endDrag(event, true));
+      this.panel.addEventListener('lostpointercapture', event => this.endDrag(event, true));
+      window.addEventListener('resize', () => { if (this.drag) this.endDrag(null, true); });
       document.addEventListener('keydown', event => this.onKeydown(event), true);
       document.addEventListener('paste', event => {
         if (this.input && event.target === this.input) {
@@ -65,6 +72,7 @@
       input.classList.add('fp-keyboard-target');
       const container = options.container || input.closest('[role="dialog"]')?.parentElement || this.host;
       container.append(this.panel);
+      container.dataset.keyboardSide = this.side;
       this.panel.hidden = false;
       this.render();
       input.focus({preventScroll: true});
@@ -73,6 +81,7 @@
 
     close(reason = 'dismiss', restoreFocus = true) {
       if (!this.input) return;
+      if (this.drag) this.endDrag(null, true);
       const input = this.input;
       const options = this.options;
       this.input = null;
@@ -90,6 +99,73 @@
       }
       input.dispatchEvent(new Event('change', {bubbles: true}));
       options.onClose?.(reason);
+    }
+
+    startDrag(event) {
+      if (event.button !== 0 || !this.input || matchMedia('(orientation:portrait)').matches) return;
+      const container = this.panel.parentElement;
+      const card = container.querySelector('.ui-card');
+      if (!card) return;
+      event.preventDefault();
+      // Freeze any in-flight settling animation before picking the window up again.
+      for (const element of [this.panel, card]) {
+        for (const animation of element.getAnimations()) {
+          if (animation.effect?.getKeyframes().some(frame => frame.translate !== undefined)) {
+            animation.commitStyles(); animation.cancel();
+          }
+        }
+      }
+      const offset = element => {
+        const parts = getComputedStyle(element).translate.split(' ').map(parseFloat);
+        return {x:parts[0] || 0,y:parts[1] || 0};
+      };
+      const keyOffset = offset(this.panel), formOffset = offset(card);
+      const bounds = container.getBoundingClientRect();
+      const key = this.panel.getBoundingClientRect();
+      const form = card.getBoundingClientRect();
+      const margin = bounds.width * (matchMedia('(max-width:820px)').matches ? .01 : .02);
+      const left = bounds.left + margin;
+      const right = bounds.right - margin - key.width;
+      if (right <= left) return;
+      this.drag = {id:event.pointerId, start:event.clientX, startY:event.clientY, keyOffset, formOffset, key, form, card, container, left, right, bounds, margin, x:key.left};
+      container.classList.add('keyboard-dragging');
+      this.panel.style.animation = 'none';
+      this.panel.setPointerCapture(event.pointerId);
+    }
+
+    moveDrag(event) {
+      const drag = this.drag;
+      if (!drag || drag.id !== event.pointerId) return;
+      drag.x = Math.max(drag.left, Math.min(drag.right, drag.key.left + event.clientX - drag.start));
+      const progress = (drag.x - drag.left) / (drag.right - drag.left);
+      const formLeft = drag.bounds.left + drag.margin;
+      const formRight = drag.bounds.right - drag.margin - drag.form.width;
+      const dy = Math.max(drag.bounds.top + 8 - drag.key.top, Math.min(drag.bounds.bottom - 44 - drag.key.top, event.clientY - drag.startY));
+      this.panel.style.translate = `${drag.keyOffset.x + drag.x - drag.key.left}px ${drag.keyOffset.y + dy}px`;
+      drag.card.style.translate = `${drag.formOffset.x + formRight + (formLeft - formRight) * progress - drag.form.left}px ${drag.formOffset.y + dy * .35}px`;
+    }
+
+    endDrag(event, cancelled = false) {
+      const drag = this.drag;
+      if (!drag || (event && event.pointerId !== drag.id)) return;
+      this.drag = null;
+      const keyBefore = this.panel.getBoundingClientRect();
+      const formBefore = drag.card.getBoundingClientRect();
+      if (!cancelled) this.side = drag.x + drag.key.width / 2 < drag.bounds.left + drag.bounds.width / 2 ? 'left' : 'right';
+      drag.container.dataset.keyboardSide = this.side;
+      this.panel.style.translate = '';
+      drag.card.style.translate = '';
+      const keyAfter = this.panel.getBoundingClientRect();
+      const formAfter = drag.card.getBoundingClientRect();
+      drag.container.classList.remove('keyboard-dragging');
+      if (!matchMedia('(prefers-reduced-motion:reduce)').matches) {
+        for (const [element, before, after] of [[this.panel,keyBefore,keyAfter],[drag.card,formBefore,formAfter]]) {
+          const delta = before.left - after.left;
+          const deltaY = before.top - after.top;
+          element.animate([{translate:`${delta}px ${deltaY}px`},{translate:'0px 0px'}],{duration:520,easing:'cubic-bezier(.22,1.18,.36,1)'});
+        }
+      }
+      if (event && this.panel.hasPointerCapture(event.pointerId)) this.panel.releasePointerCapture(event.pointerId);
     }
 
     icon(name) {
