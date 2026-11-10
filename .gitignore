@@ -13,3 +13,6 @@ build/
 
 # The shared product requirements document is explicitly approved.
 !requirement.md
+
+# Local design references and document preview; never publish by default.
+.local-design/

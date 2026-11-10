@@ -1,0 +1,31 @@
+@font-face{font-family:'Nunito Sans';font-style:normal;font-weight:700;font-display:swap;src:url('../../assets/fonts/nunito-sans-700.ttf') format('truetype')}
+@font-face{font-family:'Nunito Sans';font-style:normal;font-weight:800;font-display:swap;src:url('../../assets/fonts/nunito-sans-800.ttf') format('truetype')}
+@font-face{font-family:'Nunito Sans';font-style:normal;font-weight:900;font-display:swap;src:url('../../assets/fonts/nunito-sans-900.ttf') format('truetype')}
+:root{
+ --fp-font:'Nunito Sans','Noto Sans SC',sans-serif;
+ --fp-ink:#850e08;--fp-text:#512b2b;--fp-muted:#78504c;
+ --fp-page-background:linear-gradient(180deg,#ff505c 0%,#f52e37 100%);
+ --fp-red-top:#ff505c;--fp-red-bottom:#f52e37;
+ --fp-pink:#ffc6c4;--fp-cream:#fff6e8;--fp-gold:#ffd52c;
+ --fp-outline:#ac3639;--fp-focus:#1737c8;
+ --fp-red-surface:linear-gradient(#ff505c,#f52e37);
+ --fp-panel-surface:linear-gradient(#ffdbd1,#ffafb3);
+ --fp-cream-surface:linear-gradient(#fff8e9,#ffe3cf);
+ --fp-pink-surface:linear-gradient(#ffc8c5,#ff9e9f);
+ --fp-gold-surface:linear-gradient(#ffe878,#ffd52c);
+ --fp-icon-filter:invert(10%) sepia(83%) saturate(4597%) hue-rotate(353deg) brightness(79%) contrast(103%);
+}
+.stage{font-family:var(--fp-font)}
+.ui-icon{width:max(20px,2.35cqw);height:max(20px,2.35cqw);object-fit:contain;flex:none;filter:var(--fp-icon-filter);pointer-events:none}
+.ui-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:max(44px,5.16cqw);padding:8px max(12px,1.4cqw);border:1px solid var(--fp-outline);border-radius:max(6px,.82cqw);background:var(--fp-pink-surface);box-shadow:inset 0 2px var(--fp-cream),0 2px #ad5953;color:var(--fp-ink);font:900 max(14px,1.64cqw)/1.2 var(--fp-font);cursor:pointer;touch-action:manipulation;transition:transform 140ms,box-shadow 140ms,filter 140ms}
+.ui-btn.primary,.ui-btn.selected{background:var(--fp-gold-surface);box-shadow:inset 0 2px #fff8be,0 2px #b5751b}
+.ui-btn.neutral{background:var(--fp-cream-surface)}
+.ui-btn:hover:not(:disabled){filter:brightness(1.035)}
+.ui-btn:active:not(:disabled){transform:translateY(1px) scale(.98);box-shadow:inset 0 1px var(--fp-cream),0 1px #ad5953}
+.ui-btn:disabled{filter:saturate(.35);color:#a67a75;cursor:default}
+.ui-btn:focus-visible,.ui-icon-button:focus-visible,.ui-back:focus-visible,.account-menu-item:focus-visible{outline:3px solid var(--fp-focus);outline-offset:2px}
+.ui-icon-button,.ui-back{position:relative;display:inline-grid;place-items:center;flex:none;min-width:max(44px,5.16cqw);min-height:max(44px,5.16cqw);padding:0;border:0;background:none;cursor:pointer;touch-action:manipulation;color:var(--fp-ink)}
+.ui-back:before{content:'';position:absolute;inset:calc((100% - max(32px,3.75cqw))/2);border:1px solid var(--fp-outline);border-radius:max(6px,.7cqw);background:var(--fp-pink-surface);box-shadow:inset 0 2px var(--fp-cream),0 2px #850e08}
+.ui-back .ui-icon{position:relative;width:max(20px,2.35cqw);height:max(20px,2.35cqw)}
+.ui-back:active:before{transform:translateY(1px) scale(.98);box-shadow:inset 0 1px var(--fp-cream),0 1px #850e08}
+@media(prefers-reduced-motion:reduce){.ui-btn{transition:none}}
