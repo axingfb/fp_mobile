@@ -43,7 +43,8 @@
         const input = event.target.closest('input[data-fp-keyboard], textarea[data-fp-keyboard]');
         if (input && !this.restoring && input !== this.input) this.open(input, {
           type: input.dataset.fpKeyboard,
-          decimal: input.dataset.decimal === 'true'
+          decimal: input.dataset.decimal === 'true',
+          presentation: input.dataset.keyboardPresentation
         });
       };
       document.addEventListener('focusin', activate);
@@ -60,6 +61,7 @@
     open(input, options = {}) {
       if (!input || input.disabled || this.restoring) return;
       if (input === this.input) return;
+      if (options.presentation === 'overlay') { this.openOverlay(input, options); return; }
       this.close('switch', false);
       this.input = input;
       this.options = options;
@@ -79,6 +81,57 @@
       this.host.classList.add('fp-keyboard-open');
     }
 
+    openOverlay(source, options) {
+      this.close('switch', false);
+      const shade = document.createElement('div');
+      shade.className = 'fp-keyboard-overlay';
+      shade.setAttribute('role', 'dialog');
+      shade.setAttribute('aria-modal', 'true');
+      shade.setAttribute('aria-label', 'Search keyboard');
+      const surface = document.createElement('div');
+      surface.className = 'fp-keyboard-overlay-surface';
+      const preview = document.createElement('input');
+      preview.type = source.type === 'password' ? 'password' : 'text';
+      preview.className = 'custom-field fp-keyboard-preview';
+      preview.setAttribute('aria-label', source.getAttribute('aria-label') || 'Preview input');
+      preview.placeholder = source.placeholder;
+      preview.value = source.value;
+      preview.maxLength = options.maxLength ?? (source.maxLength >= 0 ? source.maxLength : 524288);
+      surface.append(preview); shade.append(surface); this.host.append(shade);
+      const syncSource = () => {
+        source.value = preview.value;
+        source.dispatchEvent(new Event('input', {bubbles:true}));
+      };
+      const syncPreview = () => { if (preview.value !== source.value) preview.value = source.value; };
+      preview.addEventListener('input', syncSource);
+      source.addEventListener('input', syncPreview);
+      const onClose = options.onClose;
+      this.open(preview, {...options, presentation:'internal', container:surface,
+        onChange: value => options.onChange?.(value, source),
+        onClose: reason => {
+          source.removeEventListener('input', syncPreview);
+          shade.remove();
+          source.dispatchEvent(new Event('change', {bubbles:true}));
+          if (source.isConnected && !['switch','navigation','removed','dialog'].includes(reason)) {
+            this.restoring = true; source.focus({preventScroll:true});
+            queueMicrotask(() => { this.restoring = false; });
+          }
+          onClose?.(reason);
+        }
+      });
+      this.panel.classList.add('fp-keyboard-standalone');
+      shade.addEventListener('pointerdown', event => { this.shadePress = event.target === shade; });
+      shade.addEventListener('click', event => { if (event.target === shade && this.shadePress) this.close('dismiss', false); });
+      shade.addEventListener('keydown', event => {
+        if (event.key !== 'Tab') return;
+        const nodes = [preview,...this.panel.querySelectorAll('button:not(:disabled)')];
+        if (event.shiftKey && document.activeElement === nodes[0]) { event.preventDefault(); nodes.at(-1).focus(); }
+        else if (!event.shiftKey && document.activeElement === nodes.at(-1)) { event.preventDefault(); preview.focus(); }
+      });
+      const caret = source.selectionStart ?? preview.value.length;
+      preview.setSelectionRange(caret, source.selectionEnd ?? caret);
+    }
+
     close(reason = 'dismiss', restoreFocus = true) {
       if (!this.input) return;
       if (this.drag) this.endDrag(null, true);
@@ -86,6 +139,7 @@
       const options = this.options;
       this.input = null;
       this.panel.hidden = true;
+      this.panel.classList.remove('fp-keyboard-standalone');
       input.readOnly = this.original.readOnly;
       if (this.original.inputmode === null) input.removeAttribute('inputmode');
       else input.setAttribute('inputmode', this.original.inputmode);
@@ -102,7 +156,7 @@
     }
 
     startDrag(event) {
-      if (event.button !== 0 || !this.input || matchMedia('(orientation:portrait)').matches) return;
+      if (this.panel.classList.contains('fp-keyboard-standalone') || event.button !== 0 || !this.input || matchMedia('(orientation:portrait)').matches) return;
       const container = this.panel.parentElement;
       const card = container.querySelector('.ui-card');
       if (!card) return;
@@ -201,9 +255,7 @@
       this.panel.dataset.layout = this.layout;
       const header = document.createElement('header');
       header.className = 'fp-keyboard-header';
-      const title = document.createElement('span');
-      title.textContent = this.options.title || (this.options.type === 'numeric' ? 'Number pad' : 'Keyboard');
-      header.append(title, this.button('hide', 'Hide keyboard', 'fp-hide', 'hide'));
+      header.setAttribute('aria-label', 'Drag keyboard');
       const body = document.createElement('div');
       body.className = 'fp-keyboard-body';
       this.panel.append(header, body);
@@ -213,7 +265,7 @@
         body.append(this.button('.', '.', 'fp-decimal'), this.button('0', '0'), this.button('00', '00'));
         body.append(this.button('backspace', 'Delete', 'fp-function fp-num-delete', 'backspace'));
         body.append(this.button('clear', 'Clear', 'fp-function fp-num-clear'));
-        body.append(this.button('done', 'Done', 'fp-done fp-num-done', 'check'));
+        body.append(this.button('done', this.options.doneLabel || 'Done', 'fp-done fp-num-done', 'check'));
       } else {
         const rows = this.layout === 'symbols'
           ? ['1234567890', '@#$%&*()-_', ['shift', ...'!"\':;/?', 'backspace']]
@@ -234,7 +286,7 @@
         const row = document.createElement('div');
         row.className = 'fp-key-row fp-bottom-row';
         row.append(this.button('mode', this.layout === 'symbols' ? 'ABC' : '123', 'fp-function fp-wide'),
-          this.button('@', '@'), this.button(' ', 'Space', 'fp-space'), this.button('.', '.'), this.button('done', 'Done', 'fp-done', 'check'));
+          this.button('@', '@'), this.button(' ', 'Space', 'fp-space'), this.button('.', '.'), this.button('done', this.options.doneLabel || 'Done', 'fp-done', 'check'));
         body.append(row);
       }
       this.updateKeys();
