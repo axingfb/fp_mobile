@@ -1,0 +1,10 @@
+{
+  "name": "Filplay Mobile",
+  "short_name": "Filplay",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#f52e37",
+  "theme_color": "#f52e37"
+}
