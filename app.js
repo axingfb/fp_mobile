@@ -174,10 +174,48 @@
     card.querySelectorAll('[data-preview]').forEach(button => button.onclick = () => navigate('/keyboard/' + button.dataset.preview));
     open();
   }
+  function supportPage() {
+    closeDialog(false);
+    const page = document.createElement('section');
+    page.className = 'support-page';
+    page.setAttribute('aria-label', 'Customer Service');
+    page.innerHTML = `<div class="support-rotate-tip">旋转手机，获得最佳横屏体验</div><div class="support-shell"><header class="support-header"><button type="button" class="ui-back" aria-label="Back">${icon('back')}</button><h1>Customer Service</h1></header><div class="support-messages" aria-live="polite"><div class="support-message agent">Hello! Welcome to Filplay. How can I help you today?</div><div class="support-message customer">Hi! I have a question about my account.</div><div class="support-message agent">Of course! Please let me know how I can help.</div></div><form class="support-composer"><input aria-label="Message" placeholder="Type a message" maxlength="500" autocomplete="off"><button type="submit" class="ui-btn primary">Send</button></form><div class="support-keyboard-slot"></div></div>`;
+    page.querySelector('.ui-back').onclick = () => navigate('/');
+    const form = page.querySelector('form');
+    const input = form.querySelector('input');
+    const slot = page.querySelector('.support-keyboard-slot');
+    const openKeyboard = () => {
+      if (keyboard.restoring || keyboard.isOpen) return;
+      slot.querySelectorAll('.support-keyboard-closing').forEach(element => element.remove());
+      keyboard.open(input, {type: 'letters', container: slot, onClose: () => {
+        if (!page.isConnected) return;
+        const closing = keyboard.panel.cloneNode(true);
+        closing.hidden = false;
+        closing.classList.add('support-keyboard-closing');
+        closing.setAttribute('aria-hidden', 'true');
+        closing.inert = true;
+        slot.append(closing);
+        slot.style.height = `${slot.scrollHeight}px`;
+        requestAnimationFrame(() => { slot.style.height = '0px'; });
+        closing.addEventListener('transitionend', () => closing.remove(), {once: true});
+        setTimeout(() => closing.remove(), 300);
+      }});
+      slot.style.height = `${keyboard.panel.offsetHeight}px`;
+    };
+    input.addEventListener('focus', openKeyboard);
+    input.addEventListener('click', openKeyboard);
+    page.querySelector('.support-messages').addEventListener('click', () => {
+      if (keyboard.input === input) { input.blur(); keyboard.close('dismiss', false); }
+    });
+    form.onsubmit = event => { event.preventDefault(); const input = form.querySelector('input'); const text = input.value.trim(); if (!text) return; const message = document.createElement('div'); message.className = 'support-message customer'; message.textContent = text; const messages = page.querySelector('.support-messages'); messages.append(message); input.value = ''; messages.scrollTop = messages.scrollHeight; };
+    document.body.append(page);
+  }
   function renderRoute() {
+    document.querySelectorAll('.support-page').forEach(page => page.remove());
     stage.querySelectorAll('.secondary-page').forEach(page => page.remove());
     const route = location.hash.slice(1);
-    if (route === '/account') account();
+    if (route === '/support') supportPage();
+    else if (route === '/account') account();
     else if (route === '/account/nickname') nickname();
     else if (route === '/account/avatar') avatars();
     else if (route === '/login') login();
@@ -189,6 +227,7 @@
     }
   }
   guest.onclick = () => navigate('/login');
+  document.querySelector('[aria-label="客服"]').onclick = () => navigate('/support');
   const profile = document.querySelector('.profile .avatar');
   profile.setAttribute('role', 'button'); profile.setAttribute('tabindex', '0'); profile.setAttribute('aria-label', 'Open user profile');
   profile.onclick = () => navigate('/account');
