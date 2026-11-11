@@ -52,18 +52,18 @@
  .keyboard-dragging .fp-keyboard-header{cursor:grabbing}
  .keyboard-dragging .ui-card{transition:none!important}
  .ui-overlay.typing[data-keyboard-side="left"] .fp-keyboard{left:2%;right:auto}
- .ui-overlay.typing[data-keyboard-side="left"] .ui-card{transform:translateX(calc(48cqw - 50%))}
+ .ui-overlay.typing[data-keyboard-side="left"] .ui-card{transform:none}
 }
 @media(max-width:820px) and (orientation:landscape){
  .ui-overlay.typing[data-keyboard-side="left"] .fp-keyboard{left:1%}
- .ui-overlay.typing[data-keyboard-side="left"] .ui-card{transform:translateX(calc(49cqw - 50%))}
+ .ui-overlay.typing[data-keyboard-side="left"] .ui-card{transform:none}
 }
 
 /* Compact, unlabelled grip replaces the keyboard title and collapse action. */
 .fp-keyboard .fp-keyboard-header{height:20px;min-height:20px;justify-content:center;padding:0}
 .fp-keyboard .fp-keyboard-header::after{content:'';width:36px;height:4px;border-radius:4px;background:#fff6e89c;pointer-events:none}
 
-.fp-keyboard-overlay{position:absolute;inset:0;z-index:50;background:#25152ba6;display:flex;align-items:center;justify-content:center;padding:12px}
+.fp-keyboard-overlay{position:absolute;inset:0;z-index:50;background:#25152ba6;display:flex;align-items:flex-end;justify-content:center;padding:12px}
 .fp-keyboard-overlay-surface{width:100%;display:flex;flex-direction:column;gap:10px;max-height:100%;overflow:auto}
 .fp-keyboard-overlay .fp-keyboard-preview{flex:none;width:100%;height:48px;background:var(--fp-cream-surface);font-size:18px;caret-color:var(--fp-ink)}
 .fp-keyboard-overlay .fp-keyboard-standalone{position:relative;inset:auto;width:100%;min-width:0;transform:none;translate:none!important;animation:none;flex:none;padding:10px}
@@ -92,3 +92,6 @@
  height:auto;block-size:auto;min-height:0;
  align-self:stretch;justify-self:stretch;
 }
+
+/* Numeric preview uses a compact four-column surface; letters stay full width. */
+.fp-keyboard-overlay[data-layout="numeric"] .fp-keyboard-overlay-surface{width:min(100%,440px)}

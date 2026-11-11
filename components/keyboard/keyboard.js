@@ -8,6 +8,7 @@
   class FilplayKeyboard {
     constructor(host) {
       this.host = host;
+      this.configurations = new WeakMap();
       this.input = null;
       this.side = 'right';
       this.panel = document.createElement('section');
@@ -44,7 +45,7 @@
         if (input && !this.restoring && input !== this.input) this.open(input, {
           type: input.dataset.fpKeyboard,
           decimal: input.dataset.decimal === 'true',
-          presentation: input.dataset.keyboardPresentation
+          presentation: input.dataset.keyboardPresentation || this.configurations.get(input)?.presentation
         });
       };
       document.addEventListener('focusin', activate);
@@ -58,7 +59,32 @@
 
     get isOpen() { return !!this.input; }
 
+    configure(input, kind, options = {}) {
+      this.configurations.set(input, {...options, kind});
+      input.dataset.fpKeyboard = kind;
+      input.setAttribute('inputmode', 'none');
+      return this;
+    }
+
+    setType(input, kind, options = {}) {
+      const reopen = input === this.input || input === this.source;
+      this.configure(input, kind, options);
+      if (reopen) { this.close('switch', false); this.open(input); }
+    }
+
     open(input, options = {}) {
+      if (!input) return;
+      options = {...this.configurations.get(input), ...options};
+      const aliases = {'弹窗式数字键盘':'popup-numeric','弹窗式字母键盘':'popup-letters','预览式数字键盘':'preview-numeric','预览式字母键盘':'preview-letters'};
+      const kind = aliases[options.kind || options.type] || options.kind || options.type;
+      if (['popup-numeric','popup-letters','preview-numeric','preview-letters'].includes(kind)) {
+        options.type = kind.endsWith('numeric') ? 'numeric' : 'letters';
+        options.presentation = kind.startsWith('preview-') ? 'overlay' : undefined;
+      }
+      if (kind === 'preview') { options.type = options.layout === 'numeric' ? 'numeric' : 'letters'; options.presentation = 'overlay'; }
+      else if (kind === 'numeric' || kind === 'letters') options.type = kind;
+      if (input === this.source && this.isOpen) return;
+
       if (!input || input.disabled || this.restoring) return;
       if (input === this.input) return;
       if (options.presentation === 'overlay') { this.openOverlay(input, options); return; }
@@ -85,9 +111,10 @@
       this.close('switch', false);
       const shade = document.createElement('div');
       shade.className = 'fp-keyboard-overlay';
+      shade.dataset.layout = options.type === 'numeric' ? 'numeric' : 'letters';
       shade.setAttribute('role', 'dialog');
       shade.setAttribute('aria-modal', 'true');
-      shade.setAttribute('aria-label', 'Search keyboard');
+      shade.setAttribute('aria-label', options.type === 'numeric' ? 'Numeric preview keyboard' : 'Letter preview keyboard');
       const surface = document.createElement('div');
       surface.className = 'fp-keyboard-overlay-surface';
       const preview = document.createElement('input');
@@ -106,7 +133,7 @@
       preview.addEventListener('input', syncSource);
       source.addEventListener('input', syncPreview);
       const onClose = options.onClose;
-      this.open(preview, {...options, presentation:'internal', container:surface,
+      this.open(preview, {...options, kind:options.type, presentation:'internal', container:surface,
         onChange: value => options.onChange?.(value, source),
         onClose: reason => {
           source.removeEventListener('input', syncPreview);
@@ -119,6 +146,7 @@
           onClose?.(reason);
         }
       });
+      this.source = source;
       this.panel.classList.add('fp-keyboard-standalone');
       shade.addEventListener('pointerdown', event => { this.shadePress = event.target === shade; });
       shade.addEventListener('click', event => { if (event.target === shade && this.shadePress) this.close('dismiss', false); });
@@ -138,6 +166,7 @@
       const input = this.input;
       const options = this.options;
       this.input = null;
+      this.source = null;
       this.panel.hidden = true;
       this.panel.classList.remove('fp-keyboard-standalone');
       input.readOnly = this.original.readOnly;

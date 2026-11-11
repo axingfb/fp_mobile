@@ -76,12 +76,13 @@
   }
   function activate(input) {
     if (keyboard.restoring || (active === input && keyboard.isOpen)) return;
+    const isLogin = overlay.dataset.dialog === 'Log in';
     keyboard.open(input, {
-      type: ['phone', 'otp'].includes(input.dataset.field) ? 'numeric' : 'letters', container: overlay,
+      kind: isLogin ? (['phone', 'otp'].includes(input.dataset.field) ? 'preview-numeric' : 'preview-letters') : 'popup-letters', container: overlay,
       onChange: value => { values[input.dataset.field] = value; },
       onClose: () => { overlay.classList.remove('typing'); active = null; }
     });
-    active = input; overlay.classList.add('typing');
+    active = input; if (!isLogin) overlay.classList.add('typing');
   }
   function bindFields() {
     card.querySelectorAll('[data-field]').forEach(input => {

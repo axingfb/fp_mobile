@@ -53,8 +53,7 @@
       const keyboard = window.fpKeyboard;
       if (keyboard.restoring || keyboard.isOpen) return;
       keyboard.open(input, {
-        type: 'letters', presentation: 'overlay', doneLabel: 'Search',
-        onDone: submit
+        kind: 'preview'
       });
     };
     input.addEventListener('focus', openSearchKeyboard);
