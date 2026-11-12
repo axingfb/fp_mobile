@@ -3,8 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f52e37">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Filplay Mobile · 产品原型</title>
@@ -36,34 +34,6 @@
 <main id="document" class="document" aria-label="需求文档"><div class="document-shell"><header class="doc-header"><div class="doc-kicker">FILPLAY MOBILE / DOCUMENTATION</div><h1>产品需求文档</h1><p>项目统一需求文档 · requirement.md</p></header><article id="content" class="markdown" aria-live="polite">正在加载需求文档…</article></div></main>
 <nav class="switcher" aria-label="视图模式"><button type="button" data-mode="prototype" aria-pressed="true" aria-label="原型模式" title="原型模式"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg></button><button type="button" data-mode="document" aria-pressed="false" aria-label="文档模式" title="文档模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4M9 12h7M9 16h7"/></svg></button></nav>
 <script>
-// Fullscreen requires a real user gesture; attempt it once on the first prototype interaction.
-const mobileFullscreen = matchMedia('(pointer: coarse)').matches && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-let fullscreenAttempted = false;
-function showFullscreenHelp(){
-  if(document.querySelector('#fullscreen-help')) return;
-  const help=document.createElement('aside');
-  help.id='fullscreen-help';
-  help.setAttribute('role','status');
-  help.style.cssText='position:fixed;z-index:10000;left:50%;bottom:60px;transform:translateX(-50%);width:min(90vw,420px);padding:16px;border:2px solid var(--fp-cream);border-radius:12px;background:var(--fp-panel-surface);color:var(--fp-text);box-shadow:0 3px var(--fp-outline);font-size:14px;line-height:1.6';
-  const text=document.createElement('p');
-  text.style.margin='0 0 8px';
-  text.textContent=/iPhone|iPad|iPod/i.test(navigator.userAgent)
-    ? '要隐藏浏览器栏，请在分享菜单中选择“添加到主屏幕”，然后从主屏幕打开。如未找到该选项，请在 Safari 中打开此链接后操作。'
-    : '此浏览器未能进入全屏，请使用浏览器的全屏功能或从主屏幕打开。';
-  const close=document.createElement('button');
-  close.type='button';close.className='ui-btn';close.textContent='知道了';close.style.minHeight='44px';
-  close.addEventListener('click',()=>help.remove());
-  help.append(text,close);document.body.append(help);
-}
-const standalone=()=>matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone;
-if(mobileFullscreen && !standalone() && (!document.documentElement.requestFullscreen || !document.fullscreenEnabled)) showFullscreenHelp();
-document.addEventListener('click', event => {
-  if (!mobileFullscreen || fullscreenAttempted || !event.isTrusted || !event.target.closest('#prototype') || document.fullscreenElement || matchMedia('(display-mode: standalone)').matches || navigator.standalone) return;
-  const request = document.documentElement.requestFullscreen;
-  if (!request || !document.fullscreenEnabled) { fullscreenAttempted=true; return; }
-  fullscreenAttempted = true;
-  request.call(document.documentElement).catch(showFullscreenHelp);
-}, {capture: true});
 function updateRoute(){const detail=/^#\/(game|category)\/[^/]+/.test(location.hash);document.querySelector('.stage').classList.toggle('detail-open',detail);document.querySelector('.detail').classList.toggle('active',detail);}
 window.addEventListener('hashchange',updateRoute);updateRoute();
 // Markdown is rendered as text first, so content in the requirement file cannot execute HTML.
