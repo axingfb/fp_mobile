@@ -12,8 +12,9 @@
     ['transactions', 'Transactions', 'transactions'], ['responsible', 'Responsible Gaming', 'responsible'],
     ['settings', 'Settings & Help', 'settings']
   ];
-  let accountSection = 'account', fundTab = 'GCash', transactionTab = 'Deposit', gameStatus = 'All Status', gamePeriod = 'Today', depositStatus = 'All Status', depositPeriod = 'Last 7 days', withdrawalStatus = 'All Status', withdrawalPeriod = 'Last 7 days';
-  const gameRecords = [{game: 'Fortune Treasures', status: 'Completed', time: '11/12/2026 14:45:32', bet: 2, win: 0}, {game: 'Super Ace', status: 'Completed', time: '11/12/2026 14:45:21', bet: 2, win: 16}, {game: 'Gold Miner', status: 'Pending', time: '11/12/2026 14:40:00', bet: 5, win: 0}];
+  let accountSection = 'account', fundTab = 'GCash', transactionTab = 'Deposit', gameProvider = 'All Games', gamePeriod = 'Today', depositStatus = 'All Status', depositPeriod = 'Last 7 days', withdrawalStatus = 'All Status', withdrawalPeriod = 'Last 7 days', rewardPeriod = 'Last 3 days';
+  let transactionDetail = null, transactionScroll = 0;
+  const gameRecords = [{game: 'Fortune Treasures', provider: 'PG', status: 'Completed', time: '11/12/2026 14:45:32', bet: 2, win: 0}, {game: 'Super Ace', provider: 'JILI', status: 'Completed', time: '11/12/2026 14:45:21', bet: 2, win: 16}, {game: 'Gold Miner', provider: 'Facai', status: 'Pending', time: '11/12/2026 14:40:00', bet: 5, win: 0}];
   let responsibleScroll = 0, blockDuration = '15 Days', openTime = null;
   let fromSecurityRequirements = false;
   const fundDraft = {bank: '', first: '', middle: '', last: '', number: ''};
@@ -96,6 +97,7 @@
   function dismiss() {
     if (fromSecurityRequirements && ['#/account/kyc', '#/account/wallet-password'].includes(location.hash)) { fromSecurityRequirements = false; navigate('/account/security-requirements'); return; }
     if (location.hash === '#/account/remove-fund' || location.hash === '#/account/remove-verify') { pendingRemoval = null; navigate('/account'); return; }
+    if (location.hash === '#/account/transaction-detail') { navigate('/account'); return; }
     if (location.hash === '#/account/add-fund') { navigate('/account'); return; }
     if (location.hash === '#/account/security-requirements') { navigate('/account'); return; }
     if (['#/account/block-confirm', '#/account/faq', '#/account/terms', '#/account/fund-verify', '#/account/login-password', '#/account/wallet-password', '#/account/kyc'].includes(location.hash)) { navigate('/account'); return; }
@@ -190,14 +192,14 @@
       });
       content.querySelector('.account-avatar').style.background = avatarColors[avatar] || avatarColors.cream;
       content.querySelector('.account-name span').textContent = name;
-      content.querySelector('.account-name').onclick = () => navigate('/account/nickname');
+      content.querySelector('.account-name').onclick = editNickname;
       content.querySelector('.account-avatar').onclick = () => navigate('/account/avatar');
       content.querySelector('.copy-id').onclick = async () => { try { await navigator.clipboard.writeText('10000001'); toast('ID copied'); } catch { toast('Copy unavailable'); } };
     } else if (accountSection === 'funds' || accountSection === 'transactions') {
       const funds = accountSection === 'funds';
       const tabs = funds ? ['GCash', 'Bank', 'Maya'] : ['Deposit', 'Withdrawal', 'Game', 'Reward'];
       const selected = funds ? fundTab : transactionTab;
-      content.innerHTML = `<div class="center-tabs" role="tablist">${tabs.map(tab => `<button type="button" class="ui-btn ${tab === selected ? 'selected' : ''}" role="tab" aria-selected="${tab === selected}" data-tab="${tab}">${tab}</button>`).join('')}</div>${funds ? `<div class="fund-list"></div><div class="center-empty fund-add">${fundAccounts[fundTab].length ? '' : `${icon('wallet')}<span>No accounts added</span>`}<button type="button" class="ui-btn primary" id="add-fund-account" ${fundAccounts[fundTab].length >= 5 ? 'disabled' : ''}>Add Account</button></div>` : selected === 'Game' ? `<div class="game-history"></div>` : ['Deposit', 'Withdrawal'].includes(selected) ? `<div class="deposit-history"></div>` : `<div class="center-empty">${icon('transactions')}<span>Transaction records unavailable</span></div>`}`;
+      content.innerHTML = `<div class="center-tabs" role="tablist">${tabs.map(tab => `<button type="button" class="ui-btn ${tab === selected ? 'selected' : ''}" role="tab" aria-selected="${tab === selected}" data-tab="${tab}">${tab}</button>`).join('')}</div>${funds ? `<div class="fund-list"></div><div class="center-empty fund-add">${fundAccounts[fundTab].length ? '' : `${icon('wallet')}<span>No accounts added</span>`}<button type="button" class="ui-btn primary" id="add-fund-account" ${fundAccounts[fundTab].length >= 5 ? 'disabled' : ''}>Add Account</button></div>` : selected === 'Game' ? `<div class="game-history"></div>` : selected === 'Reward' ? `<div class="reward-history"></div>` : ['Deposit', 'Withdrawal'].includes(selected) ? `<div class="deposit-history"></div>` : `<div class="center-empty">${icon('transactions')}<span>Transaction records unavailable</span></div>`}`;
       if (!funds && ['Deposit', 'Withdrawal'].includes(selected)) {
         const withdrawal = selected === 'Withdrawal', statusFilter = withdrawal ? withdrawalStatus : depositStatus, periodFilter = withdrawal ? withdrawalPeriod : depositPeriod;
         const now = new Date(), day = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -209,20 +211,32 @@
         const records = examples.filter(record => { const date = new Date(record.date.getFullYear(), record.date.getMonth(), record.date.getDate()); return (statusFilter === 'All Status' || record.status === statusFilter) && date >= start && date <= end; });
         const format = date => `${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}:${String(date.getSeconds()).padStart(2,'0')}`;
         const history = content.querySelector('.deposit-history');
-        history.innerHTML = `<div class="game-history-tools"><label><span class="sr-only">Status</span><select class="custom-field" id="deposit-status" aria-label="Status">${['All Status','Pending','Completed','Canceled','Timeout'].map(status => `<option ${status === statusFilter ? 'selected' : ''}>${status}</option>`).join('')}</select></label><label><span class="sr-only">Time period</span><select class="custom-field" id="deposit-period" aria-label="Time period">${['Today','Yesterday','Last 7 days','Last 15 days','Last 30 days'].map(period => `<option ${period === periodFilter ? 'selected' : ''}>${period}</option>`).join('')}</select></label></div><div class="deposit-records">${records.length ? records.map(record => `<article class="deposit-record"><div><strong>${record.channel}</strong><time>${format(record.date)}</time></div><div class="deposit-record-right"><strong>${withdrawal ? '−' : '+'} ₱${record.amount.toFixed(2)}</strong><span>${record.status}</span></div></article>`).join('') : `<div class="center-empty">${icon('transactions')}<span>No records</span></div>`}</div><div class="deposit-count">${records.length} ${records.length === 1 ? 'record' : 'records'}</div>`;
+        history.innerHTML = `<div class="game-history-tools"><label><span class="sr-only">Status</span><select class="custom-field" id="deposit-status" aria-label="Status">${['All Status','Pending','Completed','Canceled','Timeout'].map(status => `<option ${status === statusFilter ? 'selected' : ''}>${status}</option>`).join('')}</select></label><label><span class="sr-only">Time period</span><select class="custom-field" id="deposit-period" aria-label="Time period">${['Today','Yesterday','Last 7 days','Last 15 days','Last 30 days'].map(period => `<option ${period === periodFilter ? 'selected' : ''}>${period}</option>`).join('')}</select></label></div><div class="deposit-records">${records.length ? records.map((record, index) => `<button type="button" class="deposit-record" data-record-index="${index}"><div><strong>${record.channel}</strong><time>${format(record.date)}</time></div><div class="deposit-record-right"><strong>${withdrawal ? '−' : '+'} ₱${record.amount.toFixed(2)}</strong><span>${record.status}</span></div></button>`).join('') : `<div class="center-empty">${icon('transactions')}<span>No records</span></div>`}</div><div class="deposit-count">${records.length} ${records.length === 1 ? 'record' : 'records'}</div>`;
+        history.querySelectorAll('[data-record-index]').forEach(button => button.onclick = () => { const record = records[Number(button.dataset.recordIndex)]; transactionDetail = {...record, type: selected, id: `${withdrawal ? '2' : '1'}${record.date.getTime()}${String(record.amount).padStart(4, '0')}`}; transactionScroll = content.scrollTop; navigate('/account/transaction-detail'); });
         history.querySelector('#deposit-status').onchange = event => { if (withdrawal) withdrawalStatus = event.target.value; else depositStatus = event.target.value; account(); };
         history.querySelector('#deposit-period').onchange = event => { if (withdrawal) withdrawalPeriod = event.target.value; else depositPeriod = event.target.value; account(); };
+      }
+      if (!funds && selected === 'Reward') {
+        const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const days = {'Today':1, 'Yesterday':1, 'Last 3 days':3, 'Last 7 days':7, 'Last 15 days':15, 'Last 30 days':30};
+        const end = new Date(today); if (rewardPeriod === 'Yesterday') end.setDate(end.getDate() - 1);
+        const start = new Date(end); start.setDate(start.getDate() - days[rewardPeriod] + 1);
+        const rewards = [0, 1, 2].map((offset, index) => { const date = new Date(today); date.setDate(date.getDate() - offset); date.setHours(16, 15, 8); return {type: ['TPG Daily Loss Rebate', 'Daily Rebate', 'TPG Daily Loss Rebate'][index], date, bonus: [140, 28, 75][index]}; }).filter(record => { const date = new Date(record.date.getFullYear(), record.date.getMonth(), record.date.getDate()); return date >= start && date <= end; });
+        const format = date => `${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')}/${date.getFullYear()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}:${String(date.getSeconds()).padStart(2,'0')}`;
+        const history = content.querySelector('.reward-history');
+        history.innerHTML = `<div class="reward-filter"><select class="custom-field" aria-label="Time period" id="reward-period">${Object.keys(days).map(period => `<option ${period === rewardPeriod ? 'selected' : ''}>${period}</option>`).join('')}</select></div><div class="reward-records">${rewards.length ? rewards.map(record => `<article class="reward-record"><div><span>Type</span><strong>${record.type}</strong></div><div><span>Time</span><strong>${format(record.date)}</strong></div><div><span>Bonus</span><strong>+₱${record.bonus.toFixed(2)}</strong></div></article>`).join('') : `<div class="center-empty">${icon('transactions')}<span>No records</span></div>`}</div>`;
+        history.querySelector('#reward-period').onchange = event => { rewardPeriod = event.target.value; account(); };
       }
       if (!funds && selected === 'Game') {
         const today = new Date(); today.setHours(0, 0, 0, 0);
         const days = {'Today': 1, 'Yesterday': 1, 'Last 7 days': 7, 'Last 15 days': 15, 'Last 30 days': 30};
         const end = new Date(today); if (gamePeriod === 'Yesterday') end.setDate(end.getDate() - 1);
         const start = new Date(end); start.setDate(start.getDate() - days[gamePeriod] + 1);
-        const records = gameRecords.filter(record => { const [date] = record.time.split(' '), [month, day, year] = date.split('/').map(Number); const recorded = new Date(year, month - 1, day); return (gameStatus === 'All Status' || record.status === gameStatus) && recorded >= start && recorded <= end; });
+        const records = gameRecords.filter(record => { const [date] = record.time.split(' '), [month, day, year] = date.split('/').map(Number); const recorded = new Date(year, month - 1, day); return (gameProvider === 'All Games' || record.provider === gameProvider) && recorded >= start && recorded <= end; });
         const total = key => records.reduce((sum, record) => sum + record[key], 0).toFixed(2);
         const history = content.querySelector('.game-history');
-        history.innerHTML = `<div class="game-history-tools"><label><span class="sr-only">Status</span><select class="custom-field" id="game-status" aria-label="Status">${['All Status','Pending','Completed','Canceled'].map(status => `<option ${status === gameStatus ? 'selected' : ''}>${status}</option>`).join('')}</select></label><label><span class="sr-only">Time period</span><select class="custom-field" id="game-period" aria-label="Time period">${['Today','Yesterday','Last 7 days','Last 15 days','Last 30 days'].map(period => `<option ${period === gamePeriod ? 'selected' : ''}>${period}</option>`).join('')}</select></label></div><div class="game-totals"><div><span>Total Bet (₱)</span><strong>${total('bet')}</strong></div><div><span>Total Wins (₱)</span><strong>${total('win')}</strong></div></div><div class="game-records">${records.length ? records.map(record => `<article class="game-record"><div class="game-record-top"><strong>${record.game}</strong><span class="game-record-status">${record.status}</span></div><time>${record.time}</time><div class="game-values"><div><strong>${record.bet.toFixed(2)}</strong><span>Bet (₱)</span></div><div><strong>${record.win.toFixed(2)}</strong><span>Win (₱)</span></div></div></article>`).join('') : '<div class="center-empty">No records</div>'}</div>`;
-        history.querySelector('#game-status').onchange = event => { gameStatus = event.target.value; account(); };
+        history.innerHTML = `<div class="game-history-tools"><label><span class="sr-only">Provider</span><select class="custom-field" id="game-provider" aria-label="Provider">${['All Games','JILI','PG','PP','Evolution','Facai','Hacksaw'].map(provider => `<option ${provider === gameProvider ? 'selected' : ''}>${provider}</option>`).join('')}</select></label><label><span class="sr-only">Time period</span><select class="custom-field" id="game-period" aria-label="Time period">${['Today','Yesterday','Last 7 days','Last 15 days','Last 30 days'].map(period => `<option ${period === gamePeriod ? 'selected' : ''}>${period}</option>`).join('')}</select></label></div><div class="game-totals"><div><span>Total Bet (₱)</span><strong>${total('bet')}</strong></div><div><span>Total Wins (₱)</span><strong>${total('win')}</strong></div></div><div class="game-records">${records.length ? records.map(record => `<article class="game-record"><div class="game-record-top"><strong>${record.game}</strong><span class="game-record-status">${record.status}</span></div><time>${record.time}</time><div class="game-values"><div><strong>${record.bet.toFixed(2)}</strong><span>Bet (₱)</span></div><div><strong>${record.win.toFixed(2)}</strong><span>Win (₱)</span></div></div></article>`).join('') : '<div class="center-empty">No records</div>'}</div>`;
+        history.querySelector('#game-provider').onchange = event => { gameProvider = event.target.value; account(); };
         history.querySelector('#game-period').onchange = event => { gamePeriod = event.target.value; account(); };
       }
       if (funds) fundAccounts[fundTab].forEach((entry, index) => { const item = document.createElement('div'); item.className = 'fund-account-row'; const info = document.createElement('span'); if (fundTab === 'Bank') { info.className = 'fund-bank-info'; const bankName = document.createElement('span'), bankNumber = document.createElement('span'); bankName.textContent = entry.bank; bankNumber.textContent = entry.number; info.append(bankName, bankNumber); } else info.textContent = `+63 ${entry.number}`; const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'ui-btn'; remove.textContent = 'Delete'; remove.setAttribute('aria-label', `Delete ${fundTab} account ending in ${entry.number.slice(-4)}`); remove.onclick = () => { pendingRemoval = {channel: fundTab, entry}; navigate('/account/remove-fund'); }; item.append(info, remove); content.querySelector('.fund-list').append(item); });
@@ -232,6 +246,7 @@
         if (!accountStatus.kycApproved || !accountStatus.walletPasswordSet) navigate('/account/security-requirements');
         else navigate('/account/add-fund');
       };
+      if (!funds && transactionScroll) { content.scrollTop = transactionScroll; transactionScroll = 0; }
     } else if (accountSection === 'responsible') {
       const timePicker = key => {
         const value = gamingDraft[key] || '00:00';
@@ -287,6 +302,15 @@
       music.onchange = () => { localStorage.fpMusic = String(music.checked); publishSound(); };
       effects.onchange = () => { localStorage.fpSoundEffects = String(effects.checked); publishSound(); };
     }
+  }
+  function showTransactionDetail() {
+    if (!transactionDetail) { navigate('/account'); return; }
+    const record = transactionDetail;
+    const detailRow = (name, value) => `<div class="transaction-detail-row"><span>${name}</span><strong>${value}</strong></div>`;
+    shell(record.type, `<div class="transaction-detail">${detailRow('Type', record.type)}${detailRow('Payment Method', record.channel)}${detailRow('Amount', `₱${record.amount.toFixed(2)}`)}${detailRow('Status', record.status)}<div class="transaction-detail-row"><span>Transaction ID</span><div class="transaction-id"><strong></strong><button type="button" class="ui-icon-button" aria-label="Copy transaction ID">${icon('copy')}</button></div></div></div><button type="button" class="ui-btn primary transaction-okay">Okay</button>`);
+    card.querySelector('.transaction-id strong').textContent = record.id;
+    const back = () => navigate('/account'); card.querySelector('.ui-close').onclick = back; card.querySelector('.transaction-okay').onclick = back;
+    card.querySelector('.transaction-id button').onclick = async () => { try { await navigator.clipboard.writeText(record.id); toast('Transaction ID copied'); } catch { toast('Copy unavailable'); } };
   }
   function addFundAccount() {
     const bank = fundTab === 'Bank';
@@ -423,11 +447,17 @@
       signed = false; values.password = ''; values.otp = ''; sync(); closeDialog(false); navigate('/'); toast('Account blocked successfully');
     };
   }
-  function nickname() {
-    values.nickname = name;
-    shell('Change Name', `<label class="field-label" for="field-nickname">Nickname</label>${field('nickname', 'Your name')}<button type="button" class="ui-btn primary" id="save-name">Save</button>`);
-    bindFields(); card.querySelector('.ui-close').onclick = () => navigate('/account');
-    card.querySelector('#save-name').onclick = () => { if (!values.nickname.trim()) return; name = values.nickname.trim(); sync(); navigate('/account'); };
+  function editNickname() {
+    const editButton = card.querySelector('.account-name');
+    const input = document.createElement('input');
+    input.type = 'text'; input.hidden = true; input.maxLength = 24; input.value = name;
+    input.setAttribute('aria-label', 'Nickname'); input.placeholder = 'Your name';
+    stage.append(input);
+    keyboard.open(input, {
+      kind: 'preview-letters', container: overlay,
+      onDone: value => { const next = value.trim(); if (!next) { toast('Enter a nickname'); return; } name = next; values.nickname = name; sync(); const label = card.querySelector('.account-name span'); if (label) label.textContent = name; },
+      onClose: () => { input.remove(); if (editButton.isConnected) editButton.focus({preventScroll: true}); }
+    });
   }
   function avatars() {
     shell('Choose avatar', '<div class="avatar-options"></div>');
@@ -445,12 +475,12 @@
     card.querySelector('#cancel-out').onclick = card.querySelector('.ui-close').onclick = () => navigate('/account');
     card.querySelector('#confirm-out').onclick = () => { signed = false; values.password = ''; values.otp = ''; sync(); closeDialog(false); navigate('/'); };
   }
-  function secondary(title) {
+  function secondary(title, backRoute = '/account') {
     closeDialog(false);
     const page = document.createElement('section'); page.className = 'secondary-page';
     page.innerHTML = `<header class="secondary-header"><button type="button" class="ui-back" aria-label="Back">${icon('back')}</button><h2></h2></header>`;
     page.querySelector('h2').textContent = title;
-    page.querySelector('.ui-back').onclick = () => navigate('/account'); stage.append(page);
+    page.querySelector('.ui-back').onclick = () => navigate(backRoute); stage.append(page);
   }
   function keyboardPreview(numeric) {
     shell('Keyboard', `<div class="login-tabs keyboard-preview-tabs"><button type="button" class="ui-btn ${numeric ? 'selected' : ''}" data-preview="numeric">123</button><button type="button" class="ui-btn ${!numeric ? 'selected' : ''}" data-preview="letters">ABC</button></div><label class="field-label" for="keyboard-preview-input">${numeric ? 'Mobile number · +63' : 'Nickname'}</label><input id="keyboard-preview-input" class="custom-field" inputmode="none" autocomplete="off" maxlength="${numeric ? 11 : 24}" aria-label="${numeric ? 'Mobile number' : 'Nickname'}" placeholder="${numeric ? '09XXXXXXXXX' : 'Your name'}"><div class="keyboard-preview-footer"><span class="keyboard-count">0 / ${numeric ? 11 : 24}</span></div>`);
@@ -505,9 +535,11 @@
     document.querySelectorAll('.support-page').forEach(page => page.remove());
     stage.querySelectorAll('.secondary-page').forEach(page => page.remove());
     const route = location.hash.slice(1);
-    if (route === '/support') supportPage();
+    if (['/promos', '/tourney', '/bag', '/app', '/wallet'].includes(route)) secondary(({promos:'Promos', tourney:'Tourney', bag:'Bag', app:'App', wallet:'Wallet'})[route.slice(1)], '/');
+    else if (route === '/support') supportPage();
     else if (route === '/account') account();
     else if (route === '/account/block-confirm') blockAccount();
+    else if (route === '/account/transaction-detail') showTransactionDetail();
     else if (route === '/account/security-requirements') securityRequirements();
     else if (route === '/account/add-fund') addFundAccount();
     else if (route === '/account/fund-verify') fundVerify();
@@ -518,7 +550,7 @@
     else if (route === '/account/wallet-password') passwordDialog(true);
     else if (route === '/account/faq') faq();
     else if (route === '/account/terms') terms();
-    else if (route === '/account/nickname') nickname();
+    else if (route === '/account/nickname') { accountSection = 'account'; navigate('/account'); }
     else if (route === '/account/avatar') avatars();
     else if (route === '/login') login();
     else if (route === '/logout') logout();
