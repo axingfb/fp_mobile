@@ -267,3 +267,114 @@
 
 .game-menu-button{opacity:.55;transition:opacity 180ms ease}.game-menu-button.is-active{opacity:1}
 @media(prefers-reduced-motion:reduce){.game-menu-button{transition:none}}
+
+/* Promos: persistent activity list and independently scrolling details. */
+.promos-page{display:flex;flex-direction:column;padding:1.4cqw 1.8cqw;gap:1.2cqw;font-family:var(--fp-font)}
+.promos-page .secondary-header{height:4.7cqw;flex:none}
+.promos-layout{display:grid;grid-template-columns:24% minmax(0,1fr);gap:1.5cqw;flex:1;min-height:0}
+.promos-nav{display:flex;flex-direction:column;gap:1cqw;padding:.5cqw 0;overflow-y:auto}
+.promo-tab{display:flex;align-items:center;gap:1cqw;flex:none;width:100%;min-height:8.2cqw;padding:1.3cqw 1cqw;border:2px solid #fff6e888;border-radius:1.2cqw;color:var(--fp-ink);background:var(--fp-panel-surface);box-shadow:0 3px #ac3639;font:900 1.65cqw/1.25 var(--fp-font);text-align:left;cursor:pointer}
+.promo-tab-label{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;overflow-wrap:anywhere;flex:1;min-width:0}.promo-tab>.ui-icon{width:1.7cqw;height:1.7cqw;margin-left:auto;flex:none}
+.promo-tab[aria-pressed=true]{background:var(--fp-gold-surface);border-color:var(--fp-cream);box-shadow:0 3px #ac3639,inset 0 2px #fff6e8}
+.promo-content{min-height:0;overflow-y:auto;overscroll-behavior:contain;background:var(--fp-cream-surface);border:2px solid var(--fp-cream);border-radius:1.4cqw;color:var(--fp-text);scrollbar-color:#dc7775 #ffdfd1;scrollbar-width:thin}
+.promo-hero{height:17cqw;position:relative;overflow:hidden;background:#dc222c;border-radius:1.1cqw 1.1cqw 0 0}.promo-hero.cash{background:#3daee9}.promo-hero img{position:absolute;object-fit:contain}.promo-backdrop{inset:0;width:100%;height:100%;object-fit:cover!important}.promo-character{right:0;top:0;width:62%;height:112%}.promo-title-art{left:3%;top:15%;width:46%;height:70%}
+.promo-copy{padding:1.2cqw 1.6cqw}.promo-copy p{margin:0 0 1.2cqw;font:700 1.65cqw/1.45 var(--fp-font)}
+.promo-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e9aa96;border-radius:.8cqw;overflow:hidden;font:800 1.6cqw/1.35 var(--fp-font);text-align:center}.promo-table th{background:var(--fp-pink-surface);color:var(--fp-ink);padding:.8cqw}.promo-table td{padding:.75cqw;border-top:1px solid #edc4ad}.promo-table tr:nth-child(even) td{background:#ffe8d4}.promo-table td:last-child{color:var(--fp-ink);font-weight:900}
+.promo-rules{margin:0 1.6cqw 1.3cqw;border-top:1px solid #e9aa96;font-size:1.5cqw}.promo-rules summary{min-height:44px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;color:var(--fp-ink);font-weight:900;list-style:none}.promo-rules summary::-webkit-details-marker{display:none}.promo-rules .ui-icon{width:2cqw;height:2cqw;transform:rotate(90deg)}.promo-rules[open] .ui-icon{transform:rotate(-90deg)}.promo-rules ol{margin:0;padding-left:2.4cqw;line-height:1.5}.promo-rules li{margin-bottom:.8cqw}
+.promo-deposit-banner{display:block;width:100%;height:auto}.promo-deposit-tabs{display:flex;gap:.8cqw;margin-bottom:1.2cqw}.promo-deposit-tabs .ui-btn{flex:1;min-height:44px;font-size:1.6cqw;padding:.5cqw}
+.promo-tab:active{transform:scale(.98)}.promo-tab:focus-visible,.promo-content:focus-visible,.promo-rules summary:focus-visible{outline:2px solid var(--fp-gold);outline-offset:2px}
+
+/* Tournament configuration, standings and eligible games. */
+.tourney-page{display:flex;flex-direction:column;gap:1.2cqw;padding:1.4cqw 1.8cqw;font-family:var(--fp-font)}
+.tourney-page .secondary-header{height:4.7cqw;flex:none}
+.tourney-layout{display:grid;grid-template-columns:15% minmax(0,1fr);gap:1.4cqw;flex:1;min-height:0}.tourney-nav{display:flex;flex-direction:column;gap:1.2cqw;overflow:auto;padding:.3cqw .2cqw .5cqw}
+.tourney-category{min-height:9cqw;flex:none;display:flex;flex-direction:column;justify-content:center;gap:.3cqw;border:2px solid var(--fp-cream);border-radius:1.2cqw;background:var(--fp-panel-surface);color:var(--fp-ink);box-shadow:0 3px var(--fp-outline);font-family:inherit;cursor:pointer}.tourney-category strong{font-size:2.4cqw;font-weight:900}.tourney-category span{font-size:1.45cqw;font-weight:800}.tourney-category[aria-pressed=true]{background:var(--fp-gold-surface);box-shadow:0 3px var(--fp-outline),inset 0 2px #fff8d7}
+.tourney-main{display:flex;flex-direction:column;gap:1.2cqw;min-height:0;min-width:0}.tourney-banner{display:flex;justify-content:space-between;align-items:center;flex:none;min-height:11cqw;padding:1cqw 1.8cqw;background:var(--fp-panel-surface);border:2px solid var(--fp-cream);border-radius:1.4cqw;color:var(--fp-ink);box-shadow:0 3px var(--fp-outline)}
+.tourney-banner h3{display:inline;margin:0 0 0 .7cqw;font-size:1.9cqw;font-weight:900}.tourney-live{display:inline-block;background:var(--fp-ink);color:var(--fp-cream);font-size:1.15cqw;padding:.2cqw .6cqw;border-radius:.5cqw;vertical-align:middle}.tourney-pool-label{display:block;margin-top:.8cqw;font-size:1.25cqw;letter-spacing:.12em}.tourney-pool{font-size:4cqw;line-height:1.05;font-weight:900;display:inline-block;margin-right:1.3cqw;color:var(--fp-ink);text-shadow:0 2px #fff1be}.tourney-winners{font-size:1.4cqw;white-space:nowrap}.tourney-clock{display:flex;flex-direction:column;gap:.6cqw;text-align:right;font-size:1.35cqw}.tourney-clock strong{font-size:2cqw}.tourney-clock b{display:inline-block;padding:.4cqw .6cqw;border:1px solid #d9897e;border-radius:.5cqw;background:var(--fp-cream-surface)}
+.tourney-columns{display:grid;grid-template-columns:minmax(0,1fr) 28%;gap:1.2cqw;flex:1;min-height:0}.tourney-board,.tourney-games{min-width:0;min-height:0;border:2px solid var(--fp-cream);border-radius:1.2cqw;background:var(--fp-cream-surface);color:var(--fp-text);overflow:hidden;display:flex;flex-direction:column}.tourney-tabs{display:flex;background:var(--fp-panel-surface);padding:.5cqw;gap:.5cqw;flex:none}.tourney-tabs button{flex:1;min-height:44px;border:1px solid transparent;border-radius:.7cqw;background:transparent;color:var(--fp-ink);font:900 1.6cqw var(--fp-font);cursor:pointer}.tourney-tabs button[aria-pressed=true]{background:var(--fp-gold-surface);border-color:var(--fp-outline);box-shadow:inset 0 1px #fff6e8,0 2px #c36b54}
+.tourney-board-scroll{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#dc7775 #ffdfd1}.tourney-table{width:100%;border-collapse:separate;border-spacing:0;text-align:right;font-size:1.5cqw}.tourney-table th{position:sticky;top:0;background:#ffdfcf;color:var(--fp-muted);font-size:1.35cqw;z-index:1}.tourney-table th,.tourney-table td{padding:.6cqw 1cqw;white-space:nowrap;border-bottom:1px solid #efc5b2}.tourney-table th:first-child,.tourney-table td:first-child{text-align:center}.tourney-table th:nth-child(2),.tourney-table td:nth-child(2){text-align:left}.tourney-table td:last-child{color:var(--fp-ink);font-weight:900}.tourney-table tr.is-me{background:#ffe985}.tourney-rank{display:inline-grid;place-items:center;width:2.6cqw;height:2.6cqw;font-weight:900}.rank-1,.rank-2,.rank-3{border-radius:50%;border:1px solid #ba7935;background:var(--fp-gold-surface);color:#850e08;box-shadow:inset 0 1px #fff6e8}.rank-2{background:linear-gradient(#fff5e8,#dbc7b7)}.rank-3{background:linear-gradient(#ffd7a5,#e8a275)}
+.tourney-me{display:flex;justify-content:space-around;gap:.7cqw;padding:.7cqw;background:var(--fp-gold-surface);border-top:1px solid #d9a157;flex:none}.tourney-me span{font-size:1.25cqw;color:var(--fp-muted)}.tourney-me strong{display:block;color:var(--fp-ink);font-size:1.8cqw;font-weight:900}.tourney-games h3{margin:0;padding:1.1cqw;font-size:1.65cqw;color:var(--fp-ink);background:var(--fp-panel-surface)}.tourney-games h3 span{float:right;font-size:1.4cqw}.tourney-game-list{overflow:auto;scrollbar-width:thin;flex:1;min-height:0;padding:.4cqw .8cqw}.tourney-game-list a{display:flex;align-items:center;gap:.5cqw;min-height:6.3cqw;text-decoration:none;color:var(--fp-ink);font-size:1.35cqw;border-bottom:1px solid #eec7b5;font-weight:900}.tourney-game-list a>img:first-child{width:5.6cqw;height:5.7cqw;object-fit:contain}.tourney-game-list .ui-icon{width:1.5cqw;height:1.5cqw;margin-left:auto}.tourney-game-list a span{flex:1}.tourney-rules{padding:.2cqw 1.4cqw .5cqw 3cqw;margin:.8cqw 0;font-size:1.5cqw;line-height:1.5}.tourney-rules li{margin-bottom:1cqw}.tourney-page button:active{transform:scale(.98)}.tourney-page button:focus-visible,.tourney-page a:focus-visible,.tourney-board-scroll:focus-visible{outline:2px solid var(--fp-ink);outline-offset:-3px}
+
+.lobby-shortcuts img{width:4.5cqw;height:4.5cqw;min-width:32px;min-height:32px;object-fit:contain}
+
+/* Bag rewards reuse the shared red, pink, cream and gold surfaces. */
+.bag-page{display:flex;flex-direction:column;gap:1.8cqw;padding:1cqw 2cqw;font-family:var(--fp-font)}
+.bag-page .secondary-header{flex:none;min-height:44px}.bag-history-button{margin-left:auto;width:max(44px,4.7cqw);height:max(44px,4.7cqw);padding:0;border:0;background:transparent;cursor:pointer}.bag-history-button img{width:100%;height:100%;object-fit:contain}
+.bag-layout{display:grid;grid-template-columns:15% minmax(0,1fr);gap:3cqw;flex:1;min-height:0;border-top:2px solid #ffc6c480;padding:1.4cqw 2.2cqw 0;margin:0 -2cqw}
+.bag-nav{display:flex;flex-direction:column;gap:1cqw}.bag-nav .ui-btn{width:100%;min-height:max(44px,4.8cqw);font-size:1.65cqw}.bag-content{position:relative;min-height:0;overflow:auto;padding:0 0 .7cqw}.bag-reward{width:57%;min-width:360px;display:grid;grid-template-columns:22% minmax(0,1fr);gap:1cqw;padding:1.2cqw;background:var(--fp-panel-surface);border:2px solid var(--fp-cream);border-radius:1.5cqw;box-shadow:0 2px var(--fp-outline);color:var(--fp-ink)}
+.bag-game-cover{width:100%;height:12cqw;object-fit:cover;border:2px solid var(--fp-cream);border-radius:1cqw}.bag-reward-details{min-width:0;display:flex;flex-direction:column;gap:.6cqw}.bag-reward-title{display:flex;align-items:center;gap:.6cqw}.bag-reward-title h3{margin:0;font-size:1.8cqw;line-height:1.3;font-weight:900;white-space:nowrap}.bag-reward-title>span{font-size:1.1cqw;background:var(--fp-gold-surface);border:1px solid #c2853d;border-radius:.3cqw;padding:0 .4cqw;font-weight:900}.bag-provider{align-self:flex-start;padding:.1cqw 1cqw;border-radius:.4cqw;background:#fff6e899;color:var(--fp-muted);font-size:1.5cqw}.bag-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5cqw;flex:1}.bag-stats>div{display:flex;flex-direction:column;justify-content:center;padding:.5cqw .8cqw;background:var(--fp-cream-surface);border:1px solid var(--fp-cream);border-radius:.7cqw;font-size:1.55cqw;line-height:1.3}.bag-stats>div:last-child{text-align:right}.bag-stats strong{font-size:1.9cqw;font-weight:900;color:#c94630}
+.bag-reward-footer{grid-column:1/-1;display:flex;align-items:flex-end;justify-content:space-between;gap:.6cqw}.bag-wager{display:flex;align-items:center;position:relative;gap:.3cqw;min-height:44px;padding:0;border:0;background:transparent;color:#f52e37;cursor:pointer;font:900 1.8cqw var(--fp-font)}.bag-wager:before{content:"";position:absolute;left:0;right:0;top:50%;height:2.4cqw;transform:translateY(-50%);background:#fff6e899;border-radius:.5cqw;z-index:0}.bag-wager>*{position:relative}.bag-wager>img:first-child{width:6cqw;height:2.4cqw}.bag-wager .bag-wager-bolt{width:1.2cqw;height:2.6cqw;margin-left:-1.3cqw}.bag-wager>img:last-child{width:1.1cqw;height:1.3cqw;margin-right:.5cqw}.bag-time{margin:0;font-size:1.35cqw;white-space:nowrap}.bag-time strong{color:#e84454;margin-left:.5cqw}.bag-start{min-height:44px;padding:.4cqw 1cqw;font-size:1.6cqw;white-space:nowrap}.bag-load{display:block;margin:1.6cqw 0 0 43%;min-height:44px;font-size:1.6cqw}.bag-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--fp-ink);gap:1cqw}.bag-empty img{width:9cqw;height:12cqw;object-fit:contain}.bag-empty p{margin:0;font-size:1.8cqw}
+.bag-rules-dialog{width:34%;height:64%}.bag-rules-dialog .ui-card-body{display:flex;flex-direction:column;flex:1;gap:1.4cqw}.bag-wager-rules{padding:1.2cqw;background:var(--fp-cream-surface);border:1px solid var(--fp-cream);border-radius:1cqw;font-size:1.65cqw}.bag-wager-rules p{margin:.3cqw 0 1.6cqw}.bag-wager-rules p:last-child{margin-bottom:0}.bag-wager-rules p span{float:right;color:#f52e37}.bag-dialog-action{display:block;width:100%;margin-top:auto;min-height:44px}.bag-history{width:48%;height:60%}.bag-history .ui-card-body{display:flex;flex:1;flex-direction:column;gap:1.4cqw}.bag-history-filter{display:flex;justify-content:flex-end;padding-bottom:1.4cqw;border-bottom:1px dashed #e8797d}.bag-history-filter select{font:800 1.65cqw var(--fp-font);color:var(--fp-ink);min-height:44px;width:43%;padding:.5cqw 1cqw;border:1px solid var(--fp-cream);border-radius:1cqw;background:var(--fp-cream-surface)}.bag-history-results{flex:1}.bag-history .bag-dialog-action{width:30%;margin:0 auto}.bag-message{width:34%}.bag-tip-layer{position:absolute;inset:0;display:grid;place-items:center;background:#25152b88;z-index:1}.bag-message .bag-dialog-action{margin-top:1.4cqw}.bag-page button:focus-visible{outline:2px solid var(--fp-gold);outline-offset:2px}.bag-page button:active{transform:scale(.98)}
+@media(max-width:600px) and (orientation:landscape){.bag-reward{min-width:0;width:100%}.bag-nav .ui-btn{font-size:12px}.bag-reward-title h3{font-size:12px}.bag-page .secondary-header{min-height:44px}.bag-game-cover{height:18cqw}.bag-stats>div{font-size:11px}.bag-start{font-size:12px}.bag-time{font-size:10px}.bag-message,.bag-rules-dialog{width:72%}.bag-history{width:80%}.bag-wager-rules{font-size:14px}}
+.bag-wager .bag-wager-label{position:absolute;left:.45cqw;top:50%;transform:translateY(-50%);color:white;font-size:1.6cqw;font-weight:800;pointer-events:none}.bag-page .bag-layout{grid-template-columns:15% minmax(0,1fr)}
+.bag-history-filter .account-select-trigger{width:43%;font-size:1.65cqw}.bag-stats>div{font-size:max(14px,1.55cqw)}.bag-time{font-size:max(12px,1.35cqw)}.bag-wager-rules{font-size:max(14px,1.65cqw)}
+.bag-empty img{width:13cqw;height:13cqw}.bag-empty{gap:0}
+@media(orientation:portrait){
+ .prototype:has(.bag-page) .portrait-tip{display:none}
+ .stage:has(.bag-page){position:absolute;left:50%;top:50%;width:100vh;width:100dvh;height:100vw;aspect-ratio:auto;transform:translate(-50%,-50%) rotate(90deg)}
+}
+
+/* Wallet: shared Filplay controls, source channel marks and coin illustrations. */
+.wallet-page{font-family:var(--fp-font);color:var(--fp-ink)}
+.wallet-page .secondary-header{height:8cqw;min-height:0;padding:0 2.3cqw;gap:1.2cqw}
+.wallet-page .secondary-header h2{font-size:2.35cqw}
+.wallet-header-actions{margin-left:auto;display:flex;align-items:center;gap:1.3cqw}
+.wallet-header-actions>button{width:3.3cqw;height:4.5cqw;min-height:44px;min-width:44px;display:grid;place-items:center;padding:0;border:0;background:none;cursor:pointer}
+.wallet-header-actions>button img{width:2.7cqw;height:2.7cqw;object-fit:contain}
+.wallet-balance{display:flex;align-items:center;justify-content:space-between;width:11.5cqw;height:2.6cqw;background:#850e08aa;border-radius:3cqw;color:white;font-size:1.5cqw;margin-right:2.5cqw;padding-right:1cqw}
+.wallet-balance img{width:3.3cqw;height:3.3cqw;object-fit:contain;transform:translateX(-.5cqw)}
+.wallet-channels{position:absolute;top:6cqw;left:21%;display:flex;gap:.8cqw;height:3.8cqw;z-index:1}
+.wallet-channels .ui-btn{display:flex;align-items:center;justify-content:center;gap:.6cqw;width:10.4cqw;height:100%;min-height:0;border-radius:1cqw 1cqw 0 0;font-size:1.55cqw}
+.wallet-channels img{width:2.3cqw;height:2.1cqw;object-fit:contain}
+.wallet-channels [data-wallet-channel="GCash"] img{width:7.3cqw;height:2.2cqw}
+.wallet-layout{position:absolute;inset:9.6cqw 0 0;display:flex;gap:3cqw;padding:2cqw 4.8cqw;border-top:2px solid var(--fp-pink);border-radius:1.4cqw;background:linear-gradient(#bb171c66,#ffc6c433)}
+.wallet-modes{width:12.5cqw;flex:none;display:flex;flex-direction:column;gap:1cqw}
+.wallet-modes .ui-btn{height:3.6cqw;min-height:0;font-size:1.55cqw}
+.wallet-grid{display:grid;grid-template-rows:repeat(2,12.8cqw);grid-auto-flow:column;grid-auto-columns:10.7cqw;gap:.9cqw .8cqw;overflow:auto;align-content:start;padding:.1cqw .2cqw .5cqw;min-width:0;scrollbar-width:thin}
+.wallet-amount-card{position:relative;display:block;width:10.7cqw;height:12.8cqw;flex:none;padding:0;border:0;background:linear-gradient(160deg,#ff414c,#ffb3bb);border-radius:1.1cqw;box-shadow:inset 0 0 0 1px var(--fp-cream);color:var(--fp-ink);cursor:pointer;overflow:visible;transform:skewX(-3deg)}
+.wallet-amount-card>img,.wallet-free,.wallet-price{transform:skewX(3deg)}
+.wallet-card-frame{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.wallet-coins{position:absolute;left:8%;top:15%;width:84%;height:53%;object-fit:contain}
+.wallet-price{position:absolute;bottom:9%;left:7%;width:86%;height:24%;display:flex;align-items:center;justify-content:center;background:var(--fp-gold-surface);border:2px solid var(--fp-cream);border-radius:3cqw;box-shadow:0 2px #b85b41;font-size:1.9cqw;font-weight:900;white-space:nowrap}
+.wallet-free{position:absolute;top:0;left:0;width:73%;height:17%;text-align:left;font-size:1.3cqw;line-height:1.8cqw;color:white;text-shadow:0 1px #a9783e}
+.wallet-free img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}.wallet-free b{position:relative;padding-left:.4cqw}
+.wallet-amount-card:active{transform:skewX(-3deg) scale(.98)}
+.wallet-amount-card:focus-visible,.wallet-header-actions>button:focus-visible{outline:3px solid var(--fp-gold);outline-offset:2px}
+.ui-overlay .wallet-confirm{width:32.5%;max-width:none;border-radius:1.5cqw}
+.wallet-confirm .ui-card-body{gap:.9cqw;padding:1.3cqw 1.6cqw}
+.wallet-confirm-top{display:flex;gap:1.2cqw;min-height:12.5cqw}
+.wallet-confirm-top .wallet-amount-card{width:10.5cqw;height:12.3cqw;cursor:default}
+.wallet-total{display:flex;flex:1;min-width:0;flex-direction:column;align-items:flex-start;color:var(--fp-ink);font-size:1.5cqw;font-weight:900}
+.wallet-total>strong{font-size:2.65cqw;line-height:1.25}.wallet-bonus-total{background:var(--fp-gold-surface);border:1px solid #d5a51b;padding:.2cqw .65cqw;border-radius:.4cqw;font-size:1.3cqw}
+.wallet-quantity{display:flex;align-items:center;gap:.5cqw;width:100%;margin-top:auto}
+.wallet-quantity button{border:0;padding:0;background:none;width:3cqw;height:3cqw;cursor:pointer;flex:none}.wallet-quantity button:disabled{filter:grayscale(1);opacity:.6;cursor:default}
+.wallet-quantity button img{width:100%;height:100%}.wallet-quantity output{display:grid;place-items:center;flex:1;height:3.1cqw;border:1px solid var(--fp-cream);border-radius:.5cqw;background:var(--fp-cream-surface)}
+.wallet-turnover{margin:0;font-size:.86cqw;line-height:1.3;color:var(--fp-ink)}
+.wallet-confirm .account-select-trigger{min-height:3.1cqw;font-size:1.45cqw;font-weight:900;justify-content:center}
+.wallet-confirm .wallet-submit{width:100%;min-height:3.8cqw;font-size:1.9cqw}
+.wallet-selected-account{display:flex;align-items:center;gap:.6cqw;background:var(--fp-cream-surface);border:1px solid var(--fp-cream);border-radius:.6cqw;padding:.3cqw .4cqw;font-size:1.3cqw;font-weight:900}
+.wallet-selected-account>img{width:2.2cqw;height:2cqw;object-fit:cover;object-position:left}.wallet-selected-account>span{flex:1}.wallet-selected-account .ui-btn{min-height:2.7cqw;font-size:1.25cqw}
+.wallet-account-options{display:flex;flex-direction:column;gap:8px}.wallet-account-options button[aria-pressed="true"]{outline:2px solid var(--fp-gold)}
+.wallet-result{text-align:center}.wallet-result strong{font-size:2.6cqw}.wallet-result p{font-size:1.35cqw}
+.wallet-confirm .form-error:empty{display:none}
+.wallet-page{padding:0}.wallet-page .secondary-header{height:4.7cqw}.wallet-page .secondary-header h2{color:white}
+.ui-overlay[data-dialog] .ui-card.wallet-confirm{width:32.5%;max-width:none}
+.wallet-confirm .ui-card-body{display:flex;flex-direction:column}
+.wallet-confirm .custom-field[hidden]{display:none!important}
+.wallet-grid{align-self:flex-start;max-height:100%;scrollbar-width:none}.wallet-grid::-webkit-scrollbar{display:none}
+.wallet-amount-card{box-shadow:none;transform:none;background:var(--fp-pink-surface)}
+.wallet-amount-card>img,.wallet-free,.wallet-price{transform:none}.wallet-amount-card:active{transform:scale(.98)}
+.wallet-confirm .ui-card-header{min-height:3.9cqw}.wallet-confirm .ui-card-header h2{font-size:1.95cqw}
+.wallet-confirm .account-select-trigger{height:3.2cqw;min-height:3.2cqw}
+.wallet-page .secondary-header .ui-back{width:3.2cqw;height:3.2cqw}
+.ui-overlay[data-dialog] .ui-card.wallet-flow:not(.wallet-confirm){width:36cqw;max-width:none}
+.wallet-flow .ui-card-header h2{font-size:max(18px,1.95cqw)}
+.wallet-flow .ui-card-header{min-height:max(44px,4.3cqw)}
+.wallet-modes button,.wallet-channels button,.wallet-quantity button{position:relative}
+.wallet-modes button:after,.wallet-channels button:after,.wallet-quantity button:after{content:"";position:absolute;min-height:44px;min-width:44px;inset:50% auto auto 50%;width:100%;height:100%;transform:translate(-50%,-50%)}
+@media(orientation:portrait){
+ .prototype:has(.wallet-page) .portrait-tip{display:none}
+ .stage:has(.wallet-page){position:absolute;left:50%;top:50%;width:100dvh;height:100vw;aspect-ratio:auto;transform:translate(-50%,-50%) rotate(90deg)}
+ .stage:has(.wallet-page) .ui-overlay.open{position:absolute;inset:0;padding:0}
+ .stage:has(.wallet-page) .ui-card.wallet-flow{max-height:92%}
+}

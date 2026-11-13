@@ -72,6 +72,7 @@
     });
   }
   new MutationObserver(enhanceAccountSelects).observe(overlay, {childList: true, subtree: true});
+  new MutationObserver(() => { const page = stage.querySelector('.bag-page, .wallet-page'); if (page) page.inert = overlay.classList.contains('open'); }).observe(overlay, {attributes: true, attributeFilter: ['class']});
 
   function sync() {
     stage.classList.toggle('logged-out', !signed);
@@ -102,6 +103,7 @@
     if (location.hash === '#/account/security-requirements') { navigate('/account'); return; }
     if (['#/account/block-confirm', '#/account/faq', '#/account/terms', '#/account/fund-verify', '#/account/login-password', '#/account/wallet-password', '#/account/kyc'].includes(location.hash)) { navigate('/account'); return; }
     closeDialog();
+    if(walletOrigin && location.hash === '#/account'){walletOrigin=false;navigate(`/wallet?mode=${walletMode}&channel=${walletChannel}`);return;}
     if (/^#\/(account|login|logout|keyboard)(\/|$)/.test(location.hash)) navigate('/');
   }
   function shell(title, body, preserveKeyboard = false) {
@@ -113,6 +115,7 @@
       overlay.innerHTML = `<section class="ui-card">${content}</section>`;
       card = overlay.querySelector('.ui-card');
     }
+    if(walletOrigin || location.hash.startsWith('#/wallet')) card.classList.add('wallet-flow');
     overlay.classList.add('open');
     overlay.dataset.dialog = title;
     overlay.setAttribute('aria-labelledby', 'dialog-title');
@@ -164,7 +167,7 @@
       const error = card.querySelector('.form-error');
       if (!/^09\d{9}$/.test(values.phone) && !/^9\d{9}$/.test(values.phone)) { error.textContent = 'Enter a valid mobile number.'; return; }
       if (!values[key].trim()) { error.textContent = mode === 'OTP' ? 'Enter your OTP.' : 'Enter your password.'; return; }
-      signed = true; sync(); closeDialog(false); navigate('/');
+      signed = true; sync(); closeDialog(false); navigate(walletOrigin ? '/wallet?mode=deposit' : '/');
     };
   }
   function account() {
@@ -354,6 +357,7 @@
     card.querySelectorAll('[data-requirement]:not(:disabled)').forEach(button => button.onclick = () => { fromSecurityRequirements = true; navigate('/account/' + button.dataset.requirement); });
   }
   function closeAccountFlow() {
+    if(walletOrigin && !fromSecurityRequirements){walletResume=walletResume&&accountStatus.kycApproved;navigate(`/wallet?mode=${walletMode}&channel=${walletChannel}`);return;}
     if (fromSecurityRequirements) { fromSecurityRequirements = false; navigate('/account/security-requirements'); }
     else navigate('/account');
   }
@@ -482,6 +486,159 @@
     page.querySelector('h2').textContent = title;
     page.querySelector('.ui-back').onclick = () => navigate(backRoute); stage.append(page);
   }
+  // Wallet remains local-only; no production finance requests are made.
+  let walletMode = 'deposit', walletChannel = 'GCash', walletAmount = null, walletQty = 1;
+  let walletBonus = true, walletAccount = '', walletOrigin = false, walletResume = false;
+  const walletBalance = 1000;
+  const walletAmounts = {deposit: [20,50,100,300,500,1000,3000,5000,10000,30000,50000], withdraw: [100,200,500,1000,2000,5000,10000,50000]};
+  const walletMoney = value => '₱' + value.toLocaleString('en-US');
+  const walletFree = amount => amount < 50 ? 5 : amount < 500 ? 10 : amount < 1000 ? 50 : amount < 3000 ? 100 : 200;
+  const walletImage = (amount, mode = walletMode) => {
+    const key = mode === 'deposit' ? (amount <= 50 ? '07' : amount <= 300 ? 'gold' : amount <= 500 ? '08' : amount <= 1000 ? '09' : amount <= 5000 ? '10' : amount <= 30000 ? '06' : '11') : (amount <= 100 ? '07' : amount <= 500 ? 'gold' : amount <= 1000 ? '04' : amount <= 5000 ? '08' : amount <= 10000 ? '05' : '11');
+    return 'assets/wallet/' + (key === 'gold' ? 'gold.png' : `bitmap-${key}.source.png`);
+  };
+  const walletChannelImage = channel => 'assets/wallet/' + ({GCash:'bitmap-12.source.png', QRPH:'bitmap-14.source.png', MAYA:'bitmap-13.source.png', BANK:'bank-provider-icon.source-1.svg'})[channel];
+  const walletFundKey = () => ({GCash:'GCash', MAYA:'Maya', BANK:'Bank'})[walletChannel];
+  const walletEntries = () => fundAccounts[walletFundKey()] || [];
+  function walletCard(amount, isButton = true) {
+    return `<${isButton ? 'button type="button"' : 'div'} class="wallet-amount-card" ${isButton ? `data-wallet-amount="${amount}" aria-label="${walletMode === 'deposit' ? `+${walletFree(amount)} Free ` : ''}${walletMoney(amount)}"` : ''}><img class="wallet-card-frame" src="assets/wallet/main-card-frame-hollow.source-1.svg" alt=""><img class="wallet-coins" src="${walletImage(amount)}" alt="">${walletMode === 'deposit' ? `<span class="wallet-free"><img src="assets/wallet/bonus-ribbon.source-1.png" alt=""><b>+${walletFree(amount)}Free</b></span>` : ''}<span class="wallet-price">${walletMoney(amount)}</span></${isButton ? 'button' : 'div'}>`;
+  }
+  function walletPage() {
+    secondary('Wallet', '/');
+    const page = stage.querySelector('.secondary-page'); page.classList.add('wallet-page');
+    page.querySelector('header').insertAdjacentHTML('beforeend', `<div class="wallet-header-actions"><span class="wallet-balance"><img src="assets/wallet/header-coin.png" alt=""><b>${walletBalance.toFixed(2)}</b></span>${[['support','Customer Service','cs-icon.svg'],['transactions','Transactions','txs-icon.svg'],['funds','Fund Accounts','fund-icon.svg']].map(([action,label,image])=>`<button type="button" data-wallet-action="${action}" aria-label="${label}"><img src="assets/wallet/${image}" alt=""></button>`).join('')}</div>`);
+    const channels = walletMode === 'deposit' ? ['GCash','QRPH','MAYA'] : ['BANK','MAYA','GCash'];
+    page.insertAdjacentHTML('beforeend', `<nav class="wallet-channels" aria-label="Payment channel">${channels.map(channel=>`<button type="button" class="ui-btn ${walletChannel===channel?'primary':''}" data-wallet-channel="${channel}" aria-pressed="${walletChannel===channel}"><img src="${walletChannelImage(channel)}" alt="${channel}">${['BANK','MAYA','QRPH'].includes(channel)?`<span>${channel}</span>`:''}</button>`).join('')}</nav><div class="wallet-layout"><nav class="wallet-modes" aria-label="Wallet action">${[['deposit','Deposit'],['withdraw','Withdrawal']].map(([id,label])=>`<button type="button" class="ui-btn ${walletMode===id?'primary':''}" data-wallet-mode="${id}" aria-pressed="${walletMode===id}">${label}</button>`).join('')}</nav><div class="wallet-grid">${walletAmounts[walletMode].map(amount=>walletCard(amount)).join('')}</div></div>`);
+    page.querySelectorAll('[data-wallet-mode]').forEach(button=>button.onclick=()=>{walletMode=button.dataset.walletMode; if(walletMode==='withdraw'&&walletChannel==='QRPH')walletChannel='GCash';if(walletMode==='deposit'&&walletChannel==='BANK')walletChannel='GCash';walletAmount=null;walletResume=false;navigate(`/wallet?mode=${walletMode}&channel=${walletChannel}`);});
+    page.querySelectorAll('[data-wallet-channel]').forEach(button=>button.onclick=()=>{walletChannel=button.dataset.walletChannel;walletAccount='';walletAmount=null;walletResume=false;navigate(`/wallet?mode=${walletMode}&channel=${walletChannel}`);});
+    page.querySelectorAll('[data-wallet-amount]').forEach(button=>button.onclick=()=>{if(!signed){walletOrigin=true;navigate('/login');return;}walletAmount=Number(button.dataset.walletAmount);walletQty=1;walletBonus=true;if(walletMode==='deposit'&&!accountStatus.kycApproved)walletDepositKyc();else walletConfirm();});
+    page.querySelectorAll('[data-wallet-action]').forEach(button=>button.onclick=()=>{const action=button.dataset.walletAction;if(action==='support'){navigate('/support');return;}walletOrigin=true;accountSection=action;transactionTab=walletMode==='deposit'?'Deposit':'Withdrawal';if(walletFundKey())fundTab=walletFundKey();navigate('/account');});
+  }
+  function walletConfirm() {
+    if (!walletAmount) return;
+    const withdraw = walletMode === 'withdraw', total = walletAmount * walletQty;
+    const entries=walletEntries(); if(!entries.some(entry=>entry.number===walletAccount)) walletAccount=entries[0]?.number || '';
+    shell(withdraw?'Withdrawal':'Deposit', `<div class="wallet-confirm-top">${walletCard(walletAmount,false)}<div class="wallet-total"><span>Total Amount</span><strong>${walletMoney(total)}</strong>${withdraw?'':`<b class="wallet-bonus-total" ${walletBonus?'':'hidden'}>+${walletFree(total)} Free</b>`}<div class="wallet-quantity"><button type="button" aria-label="Decrease quantity" ${walletQty===1?'disabled':''}><img src="assets/wallet/quantity-minus.svg" alt=""></button><output aria-label="Quantity">${walletQty}</output><button type="button" aria-label="Increase quantity"><img src="assets/wallet/quantity-plus.svg" alt=""></button></div></div></div>${withdraw?`<div class="wallet-selected-account"><img src="${walletChannelImage(walletChannel)}" alt="${walletChannel}"><span>${walletAccount?(walletChannel==='BANK'?'':'+63 ')+walletAccount:'No account selected'}</span><button class="ui-btn primary wallet-select-account" type="button">Select</button></div>`:`<p class="wallet-turnover">Complete turnover to withdraw. Turnover clears if balance ≤ ₱10.</p><label class="sr-only" for="wallet-bonus-select">Deposit bonus</label><select class="custom-field" id="wallet-bonus-select" aria-label="Deposit bonus"><option value="yes">Deposit Bonus +${walletMoney(walletFree(total))}</option><option value="no">NOT SELECTED</option></select>`}<div class="form-error" role="status"></div><button type="button" class="ui-btn primary wallet-submit">${withdraw?walletMoney(total):'Deposit'}</button>`);
+    card.classList.add('wallet-confirm');
+    card.querySelector('[aria-label="Decrease quantity"]').onclick=()=>{walletQty=Math.max(1,walletQty-1);walletConfirm();};
+    card.querySelector('[aria-label="Increase quantity"]').onclick=()=>{walletQty++;walletConfirm();};
+    if(withdraw)card.querySelector('.wallet-select-account').onclick=walletAccountPicker;
+    else {const select=card.querySelector('select');select.value=walletBonus?'yes':'no';select.onchange=()=>{walletBonus=select.value==='yes';card.querySelector('.wallet-bonus-total').hidden=!walletBonus;};}
+    card.querySelector('.wallet-submit').onclick=walletCheck;
+  }
+  function walletAccountPicker() {
+    shell('Withdrawal', `<div class="wallet-account-options">${walletEntries().map((entry,index)=>`<button class="custom-field" data-wallet-account="${index}" aria-pressed="${walletAccount===entry.number}">${walletChannel==='BANK'?(entry.bank||'Bank')+' · ':'+63 '}${entry.number}</button>`).join('')||'<p class="confirm-message">No accounts added</p>'}</div><button class="ui-btn primary wallet-add-account">Add</button>`);
+    card.querySelector('.ui-close').onclick=walletConfirm;
+    card.querySelectorAll('[data-wallet-account]').forEach(button=>button.onclick=()=>{walletAccount=walletEntries()[Number(button.dataset.walletAccount)].number;walletConfirm();});
+    card.querySelector('.wallet-add-account').onclick=()=>{walletOrigin=true;walletResume=true;fundTab=walletFundKey();editingFund=null;Object.keys(fundDraft).forEach(key=>fundDraft[key]='');navigate(!accountStatus.kycApproved||!accountStatus.walletPasswordSet?'/account/security-requirements':'/account/add-fund');};
+  }
+  function walletRequirements() {
+    walletOrigin=true;walletResume=true;
+    const requirement=(label,done,action,image)=>`<button class="security-requirement" type="button" data-wallet-requirement="${action}" ${done?'disabled':''}>${icon(image)}<span>${label}</span>${done?'<span class="security-done">Done</span>':icon('chevron')}</button>`;
+    shell('Security Requirements', `<div class="security-requirements">${requirement('Set Wallet Password',accountStatus.walletPasswordSet,'wallet-password','wallet')}${requirement('KYC Verify',accountStatus.kycApproved,'kyc','security')}</div>${accountStatus.walletPasswordSet&&accountStatus.kycApproved?'<button class="ui-btn primary wallet-continue">Continue</button>':''}`);
+    card.querySelector('.ui-close').onclick=()=>{walletResume=false;navigate(`/wallet?mode=${walletMode}&channel=${walletChannel}`);};
+    card.querySelectorAll('[data-wallet-requirement]:not(:disabled)').forEach(button=>button.onclick=()=>{fromSecurityRequirements=true;navigate('/account/'+button.dataset.walletRequirement);});
+    const next=card.querySelector('.wallet-continue');if(next)next.onclick=()=>{walletResume=true;navigate(`/wallet?mode=${walletMode}&channel=${walletChannel}`);};
+  }
+  function walletDepositKyc() {
+    shell('KYC Verification', `<p class="confirm-message">Complete KYC verification before making a deposit.</p><button type="button" class="ui-btn primary wallet-kyc">Verify</button>`);
+    card.querySelector('.wallet-kyc').onclick=()=>{walletOrigin=true;walletResume=true;fromSecurityRequirements=false;navigate('/account/kyc');};
+  }
+  function walletCheck() {
+    const total=walletAmount*walletQty, error=card.querySelector('.form-error');
+    if(walletMode==='deposit'&&!accountStatus.kycApproved){walletDepositKyc();return;}
+    if(walletMode==='withdraw'&&(!accountStatus.walletPasswordSet||!accountStatus.kycApproved)){walletRequirements();return;}
+    if(total<(walletMode==='deposit'?20:100)||total>50000){error.textContent=`Amount must be between ${walletMode==='deposit'?'₱20':'₱100'} and ₱50,000.`;return;}
+    if(walletMode==='withdraw'){
+      if(!walletAccount){error.textContent='Please select an account.';return;}
+      if(total>walletBalance){shell('Insufficient Balance',`<p class="confirm-message">Insufficient withdrawable balance.</p><button class="ui-btn primary wallet-return">Okay</button>`);card.querySelector('.ui-close').onclick=card.querySelector('.wallet-return').onclick=walletConfirm;return;}
+      shell('Enter Wallet Password',`<label class="field-label" for="withdraw-password">Wallet Password</label><input id="withdraw-password" class="custom-field" type="password" inputmode="none" maxlength="6" autocomplete="off" placeholder="Enter 6-digit password"><div class="form-error" role="status"></div><button class="ui-btn primary wallet-verify">Next</button>`);
+      card.querySelector('.ui-close').onclick=walletConfirm;const input=card.querySelector('input');keyboard.configure(input,'preview-numeric',{container:overlay});input.onfocus=input.onclick=()=>{if(!keyboard.restoring)keyboard.open(input,{kind:'preview-numeric',container:overlay});};
+      card.querySelector('.wallet-verify').onclick=()=>{if(!/^\d{6}$/.test(input.value)){card.querySelector('.form-error').textContent='Enter your 6-digit wallet password.';return;}if(input.value!==walletCode){card.querySelector('.form-error').textContent='Incorrect wallet password.';return;}walletResult('Withdrawal submitted',total);};return;
+    }
+    walletResult('Deposit',total);
+  }
+  function walletResult(title,total) {
+    shell(title,`<div class="wallet-result"><strong>${walletMoney(total)}</strong><p>${walletChannel}</p><p>${walletMode==='deposit'?'Payment preview ready. No real payment is created.':'Withdrawal request simulated. No funds were transferred.'}</p></div><button class="ui-btn primary wallet-finish">Done</button>`);
+    card.querySelector('.wallet-finish').onclick=()=>{walletAmount=null;closeDialog();};
+  }
+  let bagTab = 'available', bagTimer;
+  const bagExpiry = Date.now() + (4 * 86400 + 17 * 3600 + 43 * 60) * 1000;
+  function bagHistory() {
+    shell('History', `<div class="bag-history-filter"><label class="sr-only" for="bag-period">History period</label><select id="bag-period" aria-label="History period"><option>Last 3 days</option><option>Last 7 days</option></select></div><div class="bag-history-results" aria-live="polite"></div><button type="button" class="ui-btn bag-dialog-action">Back</button>`);
+    card.classList.add('bag-history');
+    card.querySelector('.bag-dialog-action').onclick = () => closeDialog();
+  }
+  function bag() {
+    secondary('Bag', '/');
+    const page = stage.querySelector('.secondary-page'); page.classList.add('bag-page');
+    page.querySelector('header').insertAdjacentHTML('beforeend', `<button class="bag-history-button" aria-label="History"><img src="assets/bag/history.png" alt=""></button>`);
+    page.querySelector('.bag-history-button').onclick = () => bagHistory();
+    page.insertAdjacentHTML('beforeend', `<div class="bag-layout"><nav class="bag-nav" aria-label="Reward status">${[['available','Available'],['in_use','In Use'],['ended','Ended']].map(([id,label])=>`<button type="button" class="ui-btn ${bagTab===id?'primary':''}" aria-pressed="${bagTab===id}" data-bag-tab="${id}">${label}</button>`).join('')}</nav><div class="bag-content">${bagTab==='available'?`<article class="bag-reward" aria-label="app首次登录奖励"><img class="bag-game-cover" src="assets/bag/poker-win.webp" alt="Poker Win"><div class="bag-reward-details"><div class="bag-reward-title"><h3>app首次登录奖励</h3><span>GAME</span></div><span class="bag-provider">fc</span><div class="bag-stats"><div><strong>0.50</strong><span>Single bet</span></div><div><strong>3</strong><span>Spins</span></div></div></div><div class="bag-reward-footer"><div><button class="bag-wager" aria-label="Wager 10.00"><img src="assets/bag/wager-chip.svg" alt=""><span class="bag-wager-label">Wager</span><img class="bag-wager-bolt" src="assets/bag/wager-icon.svg" alt=""><strong>10.00x</strong><img src="assets/bag/wager-arrow.svg" alt=""></button><p class="bag-time">Time Left <strong></strong></p></div><button class="ui-btn primary bag-start">Start Game</button></div></article>`:`<div class="bag-empty"><img src="assets/bag/empty.webp" alt=""><p>NO REWARDS YET</p></div>`}</div></div>`);
+    page.querySelectorAll('[data-bag-tab]').forEach(b => b.onclick = () => { bagTab=b.dataset.bagTab; navigate('/bag?tab='+bagTab); });
+    if (bagTab !== 'available') return;
+    const countdown = () => { const seconds = Math.max(0,Math.floor((bagExpiry-Date.now())/1000)); page.querySelector('.bag-time strong').textContent = `${Math.floor(seconds/86400)}d : ${Math.floor(seconds/3600)%24}h : ${Math.floor(seconds/60)%60}m : ${seconds%60}s`; };
+    countdown(); bagTimer = setInterval(countdown,1000);
+    page.querySelector('.bag-wager').onclick = () => {
+      shell('Wager Requirement', `<div class="bag-wager-rules"><strong>Free Spin bonus</strong><p>wagering: <span>10.00x</span></p><strong>Restricted Providers</strong><p>Provider rules are unavailable.</p></div><button class="ui-btn primary bag-dialog-action">Okay</button>`);
+      card.classList.add('bag-rules-dialog'); card.querySelector('.bag-dialog-action').onclick = () => closeDialog();
+    };
+    page.querySelector('.bag-start').onclick = () => { sessionStorage.fpGameReturn = '/bag?tab=available'; navigate('/game/1'); };
+  }
+  let tourneyIndex = 0, tourneyView = 'Leaderboard', tourneyTimer;
+  // Illustrative tournament configuration and standings for the local prototype.
+  const tourneys = [
+    {name:'MI', title:'MI Daily Tournament', pool:100000, winners:20, games:[1,2,4], bet:12500, rank:18},
+    {name:'JILI', title:'JILI Weekly Tournament', pool:200000, winners:50, games:[2,3,5], bet:6400, rank:42},
+    {name:'Slots', title:'Slots Championship', pool:50000, winners:10, games:[1,4,5,6], bet:3200, rank:26}
+  ];
+  const tourneyMoney = value => '₱ ' + value.toLocaleString('en-US');
+  function tourney() {
+    secondary('Tourney', '/');
+    const page = stage.querySelector('.secondary-page'); page.classList.add('tourney-page');
+    const t = tourneys[tourneyIndex];
+    const prizes = t.winners === 20 ? [[1,1,30000],[2,2,20000],[3,3,15000],[4,10,3000],[11,20,1400]] : t.winners === 50 ? [[1,1,50000],[2,2,30000],[3,3,20000],[4,10,6000],[11,50,1450]] : [[1,1,15000],[2,2,10000],[3,3,7500],[4,10,2500]];
+    const reward = rank => prizes.find(([a,b])=>rank>=a && rank<=b)?.[2] || 0;
+    page.insertAdjacentHTML('beforeend', `<div class="tourney-layout"><nav class="tourney-nav" aria-label="Tournament categories">${tourneys.map((x,i)=>`<button class="tourney-category" aria-pressed="${i===tourneyIndex}" data-tourney="${i}"><strong>${x.name}</strong><span>${tourneyMoney(x.pool)}</span></button>`).join('')}</nav><div class="tourney-main"><section class="tourney-banner"><div><span class="tourney-live">LIVE</span><h3>${t.title}</h3><span class="tourney-pool-label">PRIZE POOL</span><strong class="tourney-pool">${tourneyMoney(t.pool)}</strong><span class="tourney-winners">Top ${t.winners} share the pool</span></div><div class="tourney-clock"><span>Ends in</span><strong>${tourneyIndex===1?'06d':'00d'} <b>12</b> : <b>35</b> : <b>48</b></strong><span>${tourneyIndex===1?'Weekly':'Daily'} · 00:00–23:59 (UTC+8)</span></div></section><div class="tourney-columns"><section class="tourney-board"><div class="tourney-tabs" aria-label="Tournament details">${['Leaderboard','Prizes','Rules'].map(x=>`<button data-tourney-view="${x}" aria-pressed="${x===tourneyView}">${x}</button>`).join('')}</div><div class="tourney-board-scroll" tabindex="0" aria-label="${tourneyView}"></div><div class="tourney-me"><span>My rank<strong>#${t.rank}</strong></span><span>My bets<strong>${tourneyMoney(t.bet)}</strong></span><span>Est. prize<strong>${tourneyMoney(reward(t.rank))}</strong></span></div></section><aside class="tourney-games"><h3>Eligible games <span>${t.games.length}</span></h3><div class="tourney-game-list">${t.games.map(id=>`<a href="#/game/${id}" aria-label="Open ${['Fortune Treasures','Super Ace','Gold Miner','Lucky Slots','777','Sugar Rush'][id-1]}"><img src="assets/game${id}-clean.png" alt=""><span>${['Fortune Treasures','Super Ace','Gold Miner','Lucky Slots','777','Sugar Rush'][id-1]}</span>${icon('chevron')}</a>`).join('')}</div></aside></div></div></div>`);
+    const updateClock = () => {
+      const now = Date.now(), day = 86400000, offset = 8 * 3600000;
+      const localDay = Math.floor((now + offset) / day);
+      const daysLeft = tourneyIndex === 1 ? ((7 - new Date(now + offset).getUTCDay()) % 7) + 1 : 1;
+      const remaining = Math.max(0, Math.floor(((localDay + daysLeft) * day - offset - now) / 1000));
+      const parts = [Math.floor(remaining / 86400), Math.floor(remaining / 3600) % 24, Math.floor(remaining / 60) % 60, remaining % 60].map(n => String(n).padStart(2, '0'));
+      page.querySelector('.tourney-clock strong').innerHTML = `${parts[0]}d <b>${parts[1]}</b> : <b>${parts[2]}</b> : <b>${parts[3]}</b>`;
+    };
+    updateClock(); tourneyTimer = setInterval(updateClock, 1000);
+    const board = page.querySelector('.tourney-board-scroll');
+    if(tourneyView==='Leaderboard') board.innerHTML = `<table class="tourney-table"><thead><tr><th>Rank</th><th>Player</th><th>Total bets</th><th>Prize</th></tr></thead><tbody>${Array.from({length:Math.max(30,t.winners)},(_,i)=>{const r=i+1;return `<tr class="${r===t.rank?'is-me':''}"><td><span class="tourney-rank rank-${r}">${r}</span></td><td>${r===t.rank?'You':['ma***88','jo***21','an***07','li***63','ke***19'][i%5]}</td><td>${tourneyMoney(r===t.rank?t.bet:Math.round(t.bet*t.rank/r))}</td><td>${tourneyMoney(reward(r))}</td></tr>`;}).join('')}</tbody></table>`;
+    else if(tourneyView==='Prizes') board.innerHTML = `<table class="tourney-table"><thead><tr><th>Rank</th><th>Prize / player</th><th>Share</th></tr></thead><tbody>${prizes.map(([a,b,v])=>`<tr><td>${a===b?'#'+a:'#'+a+'–'+b}</td><td>${tourneyMoney(v)}</td><td>${(v/t.pool*100).toFixed(2).replace(/\.00$/,'')}%</td></tr>`).join('')}</tbody></table>`;
+    else board.innerHTML = `<ol class="tourney-rules"><li>Play the eligible games during the tournament period. Participation is automatic.</li><li>Rankings are based on total valid bets in these games, highest first. Voided bets do not count.</li><li>The top ${t.winners} players share ${tourneyMoney(t.pool)} according to the prize table.</li><li>Ties are ranked by who reached the bet total first.</li><li>Estimated prizes may change. Final results and rewards are confirmed after settlement.</li></ol>`;
+    page.querySelectorAll('[data-tourney]').forEach(b=>b.onclick=()=>{tourneyIndex=Number(b.dataset.tourney);renderRoute();stage.querySelector(`[data-tourney="${tourneyIndex}"]`).focus();});
+    page.querySelectorAll('[data-tourney-view]').forEach(b=>b.onclick=()=>{tourneyView=b.dataset.tourneyView;renderRoute();stage.querySelector(`[data-tourney-view="${tourneyView}"]`).focus();});
+    page.querySelectorAll('.tourney-game-list a').forEach(a=>a.onclick=()=>sessionStorage.fpGameReturn='#/tourney');
+  }
+  let promoIndex = 0, depositIndex = 0;
+  function promos() {
+    stage.querySelectorAll('.secondary-page').forEach(page => page.remove());
+    secondary('Promos', '/');
+    const page = stage.querySelector('.secondary-page'); page.classList.add('promos-page');
+    // Long first title is mock data for the three-line truncation state.
+    const names = ['Highest Unlimited 15% Loss CashBack Bonus with Exclusive Daily Rewards for Every VIP Member', 'Daily 1% Rebate Bonus', 'First 3 Deposits'];
+    const table = (heads, rows) => `<table class="promo-table"><thead><tr>${heads.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(x => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    const deposits = [[[20,5],[50,10],[100,10],[500,50],[1000,100],['2,000+',200]],[[100,12],[300,40],[500,70],[1000,130],[3000,350],['5,000+',600]],[[300,30],[500,80],[1000,150],[3000,400],[5000,700],['10,000+',1000]]];
+    const rules = promoIndex === 2 ? ['Activity ends December 31, 2027, 23:59:59.', 'Rewards are automatically credited within 1 hour after each successful deposit.', 'Bonus: 5× wagering. Deposit principal: 2× turnover. Applies to Slots and Fishing.', 'Free Spins winnings have no wagering requirement.', 'One claim per member. Duplicate or fraudulent accounts are disqualified.'] : ['Duplicate accounts are prohibited and may be disqualified.', 'Rewards may be withheld or recovered for system errors, incorrect calculations or promotional abuse.', 'All promotional data and results are subject to platform records.', 'Contact customer support if rewards are not credited.', 'All prizes are shouldered by the Gaming System Administrator.'];
+    page.insertAdjacentHTML('beforeend', `<div class="promos-layout"><nav class="promos-nav" aria-label="Promotions">${names.map((n,i)=>`<button type="button" class="promo-tab" aria-pressed="${i===promoIndex}" data-promo="${i}"><span class="promo-tab-label">${n}</span>${icon('chevron')}</button>`).join('')}</nav><article class="promo-content" tabindex="0" aria-label="${names[promoIndex]}"></article></div>`);
+    const content = page.querySelector('.promo-content');
+    if (promoIndex < 2) {
+      const art = promoIndex === 0 ? 'loss' : 'cash';
+      content.innerHTML = `<div class="promo-hero ${art}" role="img" aria-label="${names[promoIndex]}"><img class="promo-backdrop" src="assets/promos/${art}-backdrop.webp" alt=""><img class="promo-character" src="assets/promos/${art}-hero.webp" alt=""><img class="promo-title-art" src="assets/promos/${art}-title.webp" alt=""></div><div class="promo-copy">${promoIndex===0 ? `<p>Loss Rebate is based on your previous day's net loss and credited automatically at <strong>5:00 AM</strong> the next day.</p>${table(['VIP','Loss Rebate Bonus'],[['Bronze','1%'],['Silver','0%'],['Gold','0%'],['Platinum','0%'],['Diamond','0%']])}` : table(['Category','Rebate Bonus'],[['Selected Slot Games','1%'],['Slot','0.5%']])}</div>`;
+    } else {
+      content.innerHTML = `<img class="promo-deposit-banner" src="assets/promos/deposit.webp" alt="First 3 deposits mega rewards bonus: up to ₱1,800 + 700 free spins"><div class="promo-copy"><div class="promo-deposit-tabs" aria-label="Deposit number">${['1st Deposit','2nd Deposit','3rd Deposit'].map((x,i)=>`<button class="ui-btn ${i===depositIndex?'primary':''}" aria-pressed="${i===depositIndex}" data-deposit="${i}">${x}</button>`).join('')}</div>${table(['Deposit','Bonus','FS'],deposits[depositIndex].map(([d,b])=>['₱ '+d,'₱ '+b,0]))}</div>`;
+      content.querySelectorAll('[data-deposit]').forEach(b=>b.onclick=()=>{depositIndex=Number(b.dataset.deposit);promos();stage.querySelector(`[data-deposit="${depositIndex}"]`)?.focus();});
+    }
+    content.insertAdjacentHTML('beforeend', `<details class="promo-rules"><summary>Standard T&C ${icon('chevron')}</summary><ol>${rules.map(r=>`<li>${r}</li>`).join('')}${promoIndex<2?`<li>This promotion cannot be combined with other promotional cash incentives beyond the prescribed maximum ${promoIndex===0?'15% cashback':'1.5% cash rebate'}.</li>`:''}</ol></details>`);
+    page.querySelectorAll('[data-promo]').forEach(b=>b.onclick=()=>{promoIndex=Number(b.dataset.promo);promos();stage.querySelector(`[data-promo="${promoIndex}"]`).focus();});
+  }
   function keyboardPreview(numeric) {
     shell('Keyboard', `<div class="login-tabs keyboard-preview-tabs"><button type="button" class="ui-btn ${numeric ? 'selected' : ''}" data-preview="numeric">123</button><button type="button" class="ui-btn ${!numeric ? 'selected' : ''}" data-preview="letters">ABC</button></div><label class="field-label" for="keyboard-preview-input">${numeric ? 'Mobile number · +63' : 'Nickname'}</label><input id="keyboard-preview-input" class="custom-field" inputmode="none" autocomplete="off" maxlength="${numeric ? 11 : 24}" aria-label="${numeric ? 'Mobile number' : 'Nickname'}" placeholder="${numeric ? '09XXXXXXXXX' : 'Your name'}"><div class="keyboard-preview-footer"><span class="keyboard-count">0 / ${numeric ? 11 : 24}</span></div>`);
     const input = card.querySelector('input');
@@ -532,15 +689,22 @@
     document.body.append(page);
   }
   function renderRoute() {
+    clearInterval(tourneyTimer);
+    clearInterval(bagTimer);
     document.querySelectorAll('.support-page').forEach(page => page.remove());
     stage.querySelectorAll('.secondary-page').forEach(page => page.remove());
     const route = location.hash.slice(1);
-    if (['/promos', '/tourney', '/bag', '/app', '/wallet'].includes(route)) secondary(({promos:'Promos', tourney:'Tourney', bag:'Bag', app:'App', wallet:'Wallet'})[route.slice(1)], '/');
+    if(walletOrigin && route.startsWith('/account')) walletPage();
+    if (route === '/promos') promos();
+    else if (route === '/tourney') tourney();
+    else if (route.split('?')[0] === '/bag') { const tab = new URLSearchParams(route.split('?')[1]).get('tab'); bagTab = ['available','in_use','ended'].includes(tab) ? tab : 'available'; bag(); }
+    else if (route.split('?')[0] === '/wallet') { const params = new URLSearchParams(route.split('?')[1]); walletMode = params.get('mode') === 'withdraw' ? 'withdraw' : 'deposit'; const channels = walletMode === 'deposit' ? ['GCash','QRPH','MAYA'] : ['BANK','MAYA','GCash']; walletChannel = channels.includes(params.get('channel')) ? params.get('channel') : channels.includes(walletChannel) ? walletChannel : 'GCash'; walletOrigin = false; walletPage(); if(walletResume && walletAmount && walletAmounts[walletMode].includes(walletAmount)){walletResume=false;walletConfirm();}else walletResume=false; }
+    else if (['/app'].includes(route)) secondary(({promos:'Promos', tourney:'Tourney', bag:'Bag', app:'App', wallet:'Wallet'})[route.slice(1)], '/');
     else if (route === '/support') supportPage();
     else if (route === '/account') account();
     else if (route === '/account/block-confirm') blockAccount();
     else if (route === '/account/transaction-detail') showTransactionDetail();
-    else if (route === '/account/security-requirements') securityRequirements();
+    else if (route === '/account/security-requirements') { if(walletOrigin) walletRequirements(); else securityRequirements(); }
     else if (route === '/account/add-fund') addFundAccount();
     else if (route === '/account/fund-verify') fundVerify();
     else if (route === '/account/remove-fund') confirmFundRemoval();
@@ -560,6 +724,7 @@
       if (item) { accountSection = item[0]; account(); } else closeDialog(false);
     }
   }
+  document.querySelector('.add-balance').onclick = () => { walletResume=false; navigate('/wallet?mode=deposit'); };
   guest.onclick = () => navigate('/login');
   document.querySelector('[aria-label="客服"]').onclick = () => navigate('/support');
   const profile = document.querySelector('.profile .avatar');
@@ -569,10 +734,10 @@
   document.querySelectorAll('.detail .back').forEach(back => { back.classList.add('ui-back'); back.innerHTML = icon('back'); });
   let backdropPress = false;
   overlay.onpointerdown = event => { backdropPress = event.target === overlay; };
-  overlay.onclick = event => { if (event.target === overlay && backdropPress) dismiss(); };
+  overlay.onclick = event => { if (event.target === overlay && backdropPress) { if(card?.classList.contains('wallet-flow'))card.querySelector('.ui-close').click();else dismiss(); } };
   document.addEventListener('keydown', event => {
     if (!overlay.classList.contains('open')) return;
-    if (event.key === 'Escape') { event.preventDefault(); dismiss(); }
+    if (event.key === 'Escape') { event.preventDefault(); if(card?.classList.contains('wallet-flow'))card.querySelector('.ui-close').click();else dismiss(); }
     if (event.key !== 'Tab') return;
     const nodes = [...overlay.querySelectorAll('button:not(:disabled),input,a[href]')].filter(node => node.getClientRects().length);
     const first = nodes[0], last = nodes.at(-1);
