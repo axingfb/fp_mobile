@@ -296,14 +296,18 @@
         body.append(this.button('clear', 'Clear', 'fp-function fp-num-clear'));
         body.append(this.button('done', this.options.doneLabel || 'Done', 'fp-done fp-num-done', 'check'));
       } else {
-        const rows = this.layout === 'symbols'
-          ? ['1234567890', '@#$%&*()-_', ['shift', ...'!"\':;/?', 'backspace']]
-          : ['qwertyuiop', 'asdfghjkl', ['shift', ...'zxcvbnm', 'backspace']];
+        const isSymbols = this.layout === 'symbols' || this.layout === 'symbols-more';
+        const rows = this.layout === 'symbols-more'
+          ? ['[]{}#%^*+=', '_\\|~<>€£¥•', ['symbols-more', '.', ',', '?', '!', "'", 'backspace']]
+          : this.layout === 'symbols'
+            ? ['1234567890', '-/:;()$&@"', ['symbols-more', '.', ',', '?', '!', "'", 'backspace']]
+            : ['qwertyuiop', 'asdfghjkl', ['shift', ...'zxcvbnm', 'backspace']];
         rows.forEach((keys, rowIndex) => {
           const row = document.createElement('div');
           row.className = `fp-key-row fp-row-${rowIndex}`;
           [...keys].forEach(key => {
-            if (key === 'shift') {
+            if (key === 'symbols-more') row.append(this.button('symbols-more', this.layout === 'symbols-more' ? '123' : '#+=', 'fp-function fp-wide'));
+            else if (key === 'shift') {
               row.append(this.layout === 'symbols'
                 ? this.button('symbols-more', '#+=', 'fp-function fp-wide')
                 : this.button('shift', this.shift === 2 ? 'Caps lock' : 'Shift', 'fp-function fp-wide', 'shift'));
@@ -314,8 +318,8 @@
         });
         const row = document.createElement('div');
         row.className = 'fp-key-row fp-bottom-row';
-        row.append(this.button('mode', this.layout === 'symbols' ? 'ABC' : '123', 'fp-function fp-wide'),
-          this.button('@', '@'), this.button(' ', 'Space', 'fp-space'), this.button('.', '.'), this.button('done', this.options.doneLabel || 'Done', 'fp-done', 'check'));
+        row.append(this.button('mode', isSymbols ? 'ABC' : '123', 'fp-function fp-wide'),
+          this.button(' ', 'Space', 'fp-space'), this.button('done', this.options.doneLabel || 'Done', 'fp-done', 'check'));
         body.append(row);
       }
       this.updateKeys();
@@ -380,11 +384,8 @@
       else if (key === 'shift') { this.shift = (this.shift + 1) % 3; this.render(); }
       else if (key === 'mode') { this.layout = this.layout === 'letters' ? 'symbols' : 'letters'; this.shift = 0; this.render(); }
       else if (key === 'symbols-more') {
-        // A compact second symbol set preserves the same key positions.
-        const row = this.panel.querySelector('.fp-row-1');
-        const expanded = row.dataset.expanded !== 'true';
-        row.dataset.expanded = String(expanded);
-        row.replaceChildren(...[...(expanded ? '[]{}<>+=\\|' : '@#$%&*()-_')].map(char => this.button(char, char)));
+        this.layout = this.layout === 'symbols-more' ? 'symbols' : 'symbols-more';
+        this.shift = 0; this.render();
       } else if (key === 'clear') this.replace('', 0, this.input.value.length, 'deleteContentBackward');
       else if (key === 'backspace' || key === 'delete') {
         let {start, end} = this.selection();

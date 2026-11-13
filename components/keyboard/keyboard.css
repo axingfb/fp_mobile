@@ -95,3 +95,8 @@
 
 /* Numeric preview uses a compact four-column surface; letters stay full width. */
 .fp-keyboard-overlay[data-layout="numeric"] .fp-keyboard-overlay-surface{width:min(100%,440px)}
+
+.fp-bottom-row .fp-space{flex:6.4}
+.fp-keyboard[data-layout="symbols-more"] .fp-row-1{padding-inline:0}
+.fp-keyboard[data-layout="symbols"] .fp-row-2>.fp-key:not(.fp-wide),
+.fp-keyboard[data-layout="symbols-more"] .fp-row-2>.fp-key:not(.fp-wide){flex:1.4}
