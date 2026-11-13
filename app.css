@@ -227,3 +227,43 @@
 @media(max-width:820px) and (orientation:landscape){.ui-overlay[data-dialog="Deposit"] .ui-card,.ui-overlay[data-dialog="Withdrawal"] .ui-card{width:48%}}
 @media(orientation:portrait){.ui-overlay[data-dialog="Deposit"] .ui-card,.ui-overlay[data-dialog="Withdrawal"] .ui-card{width:min(96%,420px)}.reward-record{grid-template-columns:1fr auto}.reward-record>div:nth-child(2){grid-row:2;grid-column:1 / -1}.reward-record>div:last-child{grid-column:2;grid-row:1}}
 .lobby-shortcuts{position:absolute;z-index:2;left:2%;bottom:3%;display:flex;align-items:end;gap:.4cqw}.lobby-shortcuts a{width:5.8cqw;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:end;gap:1px;color:#fff;text-decoration:none;font:900 max(9px,1.05cqw)/1.1 var(--fp-font);text-shadow:-1px -1px #512044,1px -1px #512044,-1px 1px #512044,1px 1px #512044,0 2px #512044;-webkit-tap-highlight-color:transparent}.lobby-shortcuts svg{width:4.5cqw;height:4.5cqw;min-width:32px;min-height:32px;stroke:#9c390e;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 2px 0 #fff1b5)}.lobby-shortcuts a:focus-visible{outline:2px solid #ffd52c;outline-offset:2px}.lobby-shortcuts a:active{transform:scale(.97)}.logged-out .lobby-shortcuts,.stage.detail-open .lobby-shortcuts{display:none}
+
+/* Two-row game browser: categories above, providers below. */
+.category-browser .catalog-header{min-height:5.9cqw;height:5.9cqw}
+.category-tabs{display:flex;align-items:end;gap:.8cqw;padding:0 2.3cqw;height:7.4cqw;flex:none}
+.category-tab{position:relative;height:100%;width:8.5cqw;min-width:44px;padding:0 .3cqw;border:0;border-radius:1cqw 1cqw 0 0;background:none;cursor:pointer}
+.category-tab img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 1px #850e0844);pointer-events:none}
+.category-tab[aria-pressed=true]{background:linear-gradient(#ffd52c55,#ffd52caa);box-shadow:inset 0 -3px var(--fp-gold)}
+.category-tab[aria-pressed=true] img{transform:translateY(-.25cqw)}
+.category-history{margin-left:auto;align-self:center;min-width:13cqw;gap:.6cqw}
+.category-browser .catalog-body{display:flex;flex-direction:column;gap:1cqw;padding:1cqw 1.2cqw;overflow:hidden;margin-bottom:1cqw}
+.category-track{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,minmax(0,1fr));grid-auto-columns:calc((100cqw - 19.2cqw)/7);gap:.8cqw;flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;touch-action:pan-y;overscroll-behavior-x:contain;scrollbar-width:none;cursor:grab;user-select:none;border-radius:.8cqw}
+.category-track::-webkit-scrollbar{display:none}
+.category-track:active{cursor:grabbing}
+.category-track .game-entry{height:100%;width:100%;aspect-ratio:auto;min-width:44px;min-height:44px;filter:drop-shadow(0 2px 2px #850e0844)}
+.category-track .game-entry img{height:100%;width:100%;object-fit:contain;pointer-events:none}
+.category-track.edge-ready{box-shadow:inset 0 0 0 2px var(--fp-gold)}
+.provider-tabs{display:flex;gap:.8cqw;overflow-x:auto;flex:none;padding:2px 1px 3px;scrollbar-width:none}
+.provider-tabs[hidden]{display:none}
+.provider-tabs .ui-btn{flex:none;min-width:12cqw;min-height:max(44px,4.8cqw);padding:4px 1.4cqw;white-space:nowrap}
+.history-empty{position:absolute;top:55%;left:0;right:0;text-align:center;font-weight:800;color:var(--fp-ink)}
+.history-empty[hidden]{display:none}
+.catalog-announcement{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+
+/* Game view and draggable shortcut menu */
+.game-page{background:#241407}.game-screen{position:absolute;inset:0;background:url('assets/game-screen.png') center/cover no-repeat}.game-loading{position:absolute;inset:0;display:none;place-content:center;justify-items:center;gap:10px;background:#321b0b;color:#fff6e8;font-size:max(14px,1.7cqw)}.game-page.is-loading .game-loading{display:grid}.game-spinner{width:36px;height:36px;border:4px solid #ffcf5c66;border-top-color:#ffd52c;border-radius:50%;animation:game-spin .8s linear infinite}@keyframes game-spin{to{transform:rotate(360deg)}}
+.game-menu-button{position:absolute;z-index:2;top:11%;left:0;width:max(44px,5.5cqw);height:max(44px,5.5cqw);padding:4px;border:2px solid #713000;border-radius:50%;background:linear-gradient(#ffe76a,#ffb41b);box-shadow:inset 0 2px #fff6b0,0 2px 2px #451b0b88;color:#850e08;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font:900 max(9px,1.1cqw)/1 var(--fp-font);touch-action:none;cursor:grab}.game-menu-button:active{cursor:grabbing}.game-menu-button svg{width:52%;height:52%;fill:currentColor;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
+.game-menu-overlay{position:absolute;z-index:3;inset:0;display:grid;place-items:center;background:#1a0a09a8}.game-menu-overlay[hidden]{display:none}.game-menu-dialog{width:min(37%,320px);min-width:240px;overflow:hidden}.game-menu-dialog .ui-card-header{position:relative;display:flex;align-items:center;justify-content:center;min-height:40px}.game-menu-dialog h2{margin:0;font-size:max(16px,1.8cqw)}.game-menu-close{position:absolute;right:0;top:0;width:44px;height:100%;min-height:40px;border:0;background:transparent;cursor:pointer}.game-menu-close img{width:20px;height:20px}.game-menu-actions{display:flex;justify-content:center;gap:2cqw;padding:14px}.game-menu-actions button{width:72px;min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:0;background:transparent;color:var(--fp-ink);font:900 12px var(--fp-font);cursor:pointer}.game-action-icon{width:38px;height:38px;display:grid;place-items:center;border:2px solid #783219;border-radius:50%;box-shadow:inset 0 2px #ffffffaa,0 2px #923a2780}.reload-icon{background:linear-gradient(#51e7ff,#008aca)}.exit-icon{background:linear-gradient(#ffbb55,#e73316)}.game-action-icon svg{width:26px;height:26px;fill:none;stroke:#fff6e8;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}.game-menu-actions button:active{transform:scale(.97)}
+@media(prefers-reduced-motion:reduce){.game-spinner{animation:none;border-right-color:#ffd52c}}
+
+/* Keep the game and its floating controls usable in portrait orientation. */
+@media (orientation:portrait){
+ .stage:has(.game-page.active){width:100vw;height:100vh;height:100dvh;aspect-ratio:auto}
+ .prototype:has(.game-page.active) .portrait-tip{display:none}
+ .game-page .game-screen{background-size:contain}
+ .game-page .game-menu-button{top:max(11%, env(safe-area-inset-top))}
+ .game-page .game-menu-dialog{width:min(320px,calc(100% - 32px));min-width:0}
+}
+
+.game-menu-button{opacity:.55;transition:opacity 180ms ease}.game-menu-button.is-active{opacity:1}
+@media(prefers-reduced-motion:reduce){.game-menu-button{transition:none}}
