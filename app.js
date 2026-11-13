@@ -14,6 +14,11 @@
   ];
   let accountSection = 'account', fundTab = 'GCash', transactionTab = 'Deposit', gameProvider = 'All Games', gamePeriod = 'Today', depositStatus = 'All Status', depositPeriod = 'Last 7 days', withdrawalStatus = 'All Status', withdrawalPeriod = 'Last 7 days', rewardPeriod = 'Last 3 days';
   let transactionDetail = null, transactionScroll = 0;
+  let withdrawalRecords = [];
+  try {
+    const saved = JSON.parse(localStorage.fpWithdrawalRecords || '[]');
+    if (Array.isArray(saved)) withdrawalRecords = saved.filter(record => record && typeof record.id === 'string' && typeof record.amount === 'number' && Number.isFinite(record.amount) && record.amount > 0 && ['GCash','Maya','Bank'].includes(record.channel) && record.status === 'Pending' && Number.isFinite(new Date(record.date).getTime())).map(record => ({...record, date: new Date(record.date), type: 'Withdrawal'}));
+  } catch { /* An unreadable local history must not prevent opening Wallet. */ }
   const gameRecords = [{game: 'Fortune Treasures', provider: 'PG', status: 'Completed', time: '11/12/2026 14:45:32', bet: 2, win: 0}, {game: 'Super Ace', provider: 'JILI', status: 'Completed', time: '11/12/2026 14:45:21', bet: 2, win: 16}, {game: 'Gold Miner', provider: 'Facai', status: 'Pending', time: '11/12/2026 14:40:00', bet: 5, win: 0}];
   let responsibleScroll = 0, blockDuration = '15 Days', openTime = null;
   let fromSecurityRequirements = false;
@@ -98,7 +103,7 @@
   function dismiss() {
     if (fromSecurityRequirements && ['#/account/kyc', '#/account/wallet-password'].includes(location.hash)) { fromSecurityRequirements = false; navigate('/account/security-requirements'); return; }
     if (location.hash === '#/account/remove-fund' || location.hash === '#/account/remove-verify') { pendingRemoval = null; navigate('/account'); return; }
-    if (location.hash === '#/account/transaction-detail') { navigate('/account'); return; }
+    if (location.hash.split('?')[0] === '#/account/transaction-detail') { navigate('/account'); return; }
     if (location.hash === '#/account/add-fund') { navigate('/account'); return; }
     if (location.hash === '#/account/security-requirements') { navigate('/account'); return; }
     if (['#/account/block-confirm', '#/account/faq', '#/account/terms', '#/account/fund-verify', '#/account/login-password', '#/account/wallet-password', '#/account/kyc'].includes(location.hash)) { navigate('/account'); return; }
@@ -115,7 +120,7 @@
       overlay.innerHTML = `<section class="ui-card">${content}</section>`;
       card = overlay.querySelector('.ui-card');
     }
-    if(walletOrigin || location.hash.startsWith('#/wallet')) card.classList.add('wallet-flow');
+    if(title !== 'KYC verify' && (walletOrigin || location.hash.startsWith('#/wallet'))) card.classList.add('wallet-flow');
     overlay.classList.add('open');
     overlay.dataset.dialog = title;
     overlay.setAttribute('aria-labelledby', 'dialog-title');
@@ -211,11 +216,11 @@
         const end = new Date(day); if (periodFilter === 'Yesterday') end.setDate(end.getDate() - 1);
         const count = {'Today':1, 'Yesterday':1, 'Last 7 days':7, 'Last 15 days':15, 'Last 30 days':30}[periodFilter];
         const start = new Date(end); start.setDate(start.getDate() - count + 1);
-        const records = examples.filter(record => { const date = new Date(record.date.getFullYear(), record.date.getMonth(), record.date.getDate()); return (statusFilter === 'All Status' || record.status === statusFilter) && date >= start && date <= end; });
+        const records = (withdrawal ? [...withdrawalRecords, ...examples] : examples).filter(record => { const date = new Date(record.date.getFullYear(), record.date.getMonth(), record.date.getDate()); return (statusFilter === 'All Status' || record.status === statusFilter) && date >= start && date <= end; });
         const format = date => `${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}:${String(date.getSeconds()).padStart(2,'0')}`;
         const history = content.querySelector('.deposit-history');
         history.innerHTML = `<div class="game-history-tools"><label><span class="sr-only">Status</span><select class="custom-field" id="deposit-status" aria-label="Status">${['All Status','Pending','Completed','Canceled','Timeout'].map(status => `<option ${status === statusFilter ? 'selected' : ''}>${status}</option>`).join('')}</select></label><label><span class="sr-only">Time period</span><select class="custom-field" id="deposit-period" aria-label="Time period">${['Today','Yesterday','Last 7 days','Last 15 days','Last 30 days'].map(period => `<option ${period === periodFilter ? 'selected' : ''}>${period}</option>`).join('')}</select></label></div><div class="deposit-records">${records.length ? records.map((record, index) => `<button type="button" class="deposit-record" data-record-index="${index}"><div><strong>${record.channel}</strong><time>${format(record.date)}</time></div><div class="deposit-record-right"><strong>${withdrawal ? '−' : '+'} ₱${record.amount.toFixed(2)}</strong><span>${record.status}</span></div></button>`).join('') : `<div class="center-empty">${icon('transactions')}<span>No records</span></div>`}</div><div class="deposit-count">${records.length} ${records.length === 1 ? 'record' : 'records'}</div>`;
-        history.querySelectorAll('[data-record-index]').forEach(button => button.onclick = () => { const record = records[Number(button.dataset.recordIndex)]; transactionDetail = {...record, type: selected, id: `${withdrawal ? '2' : '1'}${record.date.getTime()}${String(record.amount).padStart(4, '0')}`}; transactionScroll = content.scrollTop; navigate('/account/transaction-detail'); });
+        history.querySelectorAll('[data-record-index]').forEach(button => button.onclick = () => { const record = records[Number(button.dataset.recordIndex)]; transactionDetail = {...record, type: selected, id: record.id || `${withdrawal ? '2' : '1'}${record.date.getTime()}${String(record.amount).padStart(4, '0')}`}; transactionScroll = content.scrollTop; navigate('/account/transaction-detail' + (record.id ? '?id=' + encodeURIComponent(record.id) : '')); });
         history.querySelector('#deposit-status').onchange = event => { if (withdrawal) withdrawalStatus = event.target.value; else depositStatus = event.target.value; account(); };
         history.querySelector('#deposit-period').onchange = event => { if (withdrawal) withdrawalPeriod = event.target.value; else depositPeriod = event.target.value; account(); };
       }
@@ -307,6 +312,8 @@
     }
   }
   function showTransactionDetail() {
+    const recordId = new URLSearchParams(location.hash.split('?')[1]).get('id');
+    if (recordId) { transactionDetail = withdrawalRecords.find(record => record.id === recordId) || null; if(transactionDetail){accountSection='transactions';transactionTab='Withdrawal';} }
     if (!transactionDetail) { navigate('/account'); return; }
     const record = transactionDetail;
     const detailRow = (name, value) => `<div class="transaction-detail-row"><span>${name}</span><strong>${value}</strong></div>`;
@@ -542,6 +549,7 @@
   }
   function walletDepositKyc() {
     shell('KYC Verification', `<p class="confirm-message">Complete KYC verification before making a deposit.</p><button type="button" class="ui-btn primary wallet-kyc">Verify</button>`);
+    card.classList.add('wallet-kyc-notice');
     card.querySelector('.wallet-kyc').onclick=()=>{walletOrigin=true;walletResume=true;fromSecurityRequirements=false;navigate('/account/kyc');};
   }
   function walletCheck() {
@@ -554,12 +562,25 @@
       if(total>walletBalance){shell('Insufficient Balance',`<p class="confirm-message">Insufficient withdrawable balance.</p><button class="ui-btn primary wallet-return">Okay</button>`);card.querySelector('.ui-close').onclick=card.querySelector('.wallet-return').onclick=walletConfirm;return;}
       shell('Enter Wallet Password',`<label class="field-label" for="withdraw-password">Wallet Password</label><input id="withdraw-password" class="custom-field" type="password" inputmode="none" maxlength="6" autocomplete="off" placeholder="Enter 6-digit password"><div class="form-error" role="status"></div><button class="ui-btn primary wallet-verify">Next</button>`);
       card.querySelector('.ui-close').onclick=walletConfirm;const input=card.querySelector('input');keyboard.configure(input,'preview-numeric',{container:overlay});input.onfocus=input.onclick=()=>{if(!keyboard.restoring)keyboard.open(input,{kind:'preview-numeric',container:overlay});};
-      card.querySelector('.wallet-verify').onclick=()=>{if(!/^\d{6}$/.test(input.value)){card.querySelector('.form-error').textContent='Enter your 6-digit wallet password.';return;}if(input.value!==walletCode){card.querySelector('.form-error').textContent='Incorrect wallet password.';return;}walletResult('Withdrawal submitted',total);};return;
+      card.querySelector('.wallet-verify').onclick=()=>{if(!/^\d{6}$/.test(input.value)){card.querySelector('.form-error').textContent='Enter your 6-digit wallet password.';return;}if(input.value!==walletCode){card.querySelector('.form-error').textContent='Incorrect wallet password.';return;}walletSubmitWithdrawal(total);};return;
     }
     walletResult('Deposit',total);
   }
+  function walletSubmitWithdrawal(total) {
+    const button = card.querySelector('.wallet-verify');
+    if (button.disabled) return;
+    button.disabled = true;
+    const record = {id: 'W' + crypto.randomUUID().replaceAll('-', ''), type: 'Withdrawal', channel: walletFundKey(), amount: total, status: 'Pending', date: new Date()};
+    const updated = [record, ...withdrawalRecords];
+    try { localStorage.fpWithdrawalRecords = JSON.stringify(updated); }
+    catch { button.disabled = false; card.querySelector('.form-error').textContent = 'Unable to save the withdrawal record. Please try again.'; return; }
+    withdrawalRecords = updated;
+    walletOrigin = false; walletResume = false; walletAmount = null;
+    closeDialog();
+    toast('Withdrawal submitted successfully');
+  }
   function walletResult(title,total) {
-    shell(title,`<div class="wallet-result"><strong>${walletMoney(total)}</strong><p>${walletChannel}</p><p>${walletMode==='deposit'?'Payment preview ready. No real payment is created.':'Withdrawal request simulated. No funds were transferred.'}</p></div><button class="ui-btn primary wallet-finish">Done</button>`);
+    shell(title,`<div class="wallet-result"><strong>${walletMoney(total)}</strong><p>${walletChannel}</p><p>Payment preview ready. No real payment is created.</p></div><button class="ui-btn primary wallet-finish">Done</button>`);
     card.querySelector('.wallet-finish').onclick=()=>{walletAmount=null;closeDialog();};
   }
   let bagTab = 'available', bagTimer;
@@ -694,7 +715,7 @@
     document.querySelectorAll('.support-page').forEach(page => page.remove());
     stage.querySelectorAll('.secondary-page').forEach(page => page.remove());
     const route = location.hash.slice(1);
-    if(walletOrigin && route.startsWith('/account')) walletPage();
+    if(walletOrigin && route.startsWith('/account') && route !== '/account/kyc') walletPage();
     if (route === '/promos') promos();
     else if (route === '/tourney') tourney();
     else if (route.split('?')[0] === '/bag') { const tab = new URLSearchParams(route.split('?')[1]).get('tab'); bagTab = ['available','in_use','ended'].includes(tab) ? tab : 'available'; bag(); }
@@ -703,7 +724,7 @@
     else if (route === '/support') supportPage();
     else if (route === '/account') account();
     else if (route === '/account/block-confirm') blockAccount();
-    else if (route === '/account/transaction-detail') showTransactionDetail();
+    else if (route.split('?')[0] === '/account/transaction-detail') showTransactionDetail();
     else if (route === '/account/security-requirements') { if(walletOrigin) walletRequirements(); else securityRequirements(); }
     else if (route === '/account/add-fund') addFundAccount();
     else if (route === '/account/fund-verify') fundVerify();

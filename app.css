@@ -378,3 +378,9 @@
  .stage:has(.wallet-page) .ui-overlay.open{position:absolute;inset:0;padding:0}
  .stage:has(.wallet-page) .ui-card.wallet-flow{max-height:92%}
 }
+
+/* All standalone Wallet dialog actions share the same footer layout.
+   Inline Select and quantity controls retain their compact layout. */
+.wallet-flow .ui-card-body > .ui-btn.primary{display:flex;width:100%;margin-top:max(12px,1.4cqw)}
+.wallet-flow.wallet-confirm .ui-card-body > .ui-btn.primary{margin-top:0}
+.wallet-flow .form-error:empty{display:none}
