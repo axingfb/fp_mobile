@@ -129,7 +129,7 @@
         source.value = preview.value;
         source.dispatchEvent(new Event('input', {bubbles:true}));
       };
-      const syncPreview = () => { if (preview.value !== source.value) preview.value = source.value; };
+      const syncPreview = () => { if (preview.value !== source.value) { preview.value = source.value; this.editor?.update(true); } };
       preview.addEventListener('input', syncSource);
       source.addEventListener('input', syncPreview);
       const onClose = options.onClose;
@@ -152,17 +152,21 @@
       shade.addEventListener('click', event => { if (event.target === shade && this.shadePress) this.close('dismiss', false); });
       shade.addEventListener('keydown', event => {
         if (event.key !== 'Tab') return;
-        const nodes = [preview,...this.panel.querySelectorAll('button:not(:disabled)')];
+        const nodes = [preview,...shade.querySelectorAll('button:not(:disabled)')].filter(node => node.getClientRects().length);
         if (event.shiftKey && document.activeElement === nodes[0]) { event.preventDefault(); nodes.at(-1).focus(); }
         else if (!event.shiftKey && document.activeElement === nodes.at(-1)) { event.preventDefault(); preview.focus(); }
       });
+      this.editor = new window.FilplayPreviewEditor(preview, shade, this);
       const caret = source.selectionStart ?? preview.value.length;
       preview.setSelectionRange(caret, source.selectionEnd ?? caret);
+      preview.focus({preventScroll:true});
+      this.editor.update(true);
     }
 
     close(reason = 'dismiss', restoreFocus = true) {
       if (!this.input) return;
       if (this.drag) this.endDrag(null, true);
+      this.editor?.destroy(); this.editor = null;
       const input = this.input;
       const options = this.options;
       this.input = null;
@@ -327,6 +331,7 @@
     }
 
     updateKeys() {
+      this.editor?.update(true);
       const empty = !this.input.value;
       this.panel.querySelectorAll('[data-key="backspace"], [data-key="clear"]').forEach(button => { button.disabled = empty; });
       const decimal = this.panel.querySelector('.fp-decimal');

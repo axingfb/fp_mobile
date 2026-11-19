@@ -15,7 +15,7 @@
 </style>
 <link rel="stylesheet" href="components/ui/theme.css">
 <link rel="stylesheet" href="app.css?v=tourney-1">
-<link rel="stylesheet" href="components/keyboard/keyboard.css?v=keyboard-keymap-4">
+<link rel="stylesheet" href="components/keyboard/keyboard.css?v=preview-edit-2">
 </head>
 <body>
 <main id="prototype" class="prototype">
@@ -68,8 +68,9 @@ async function loadRequirement(){content.textContent='正在加载需求文档�
 function setMode(mode){const isDoc=mode==='document';document.querySelector('#prototype').hidden=isDoc;document.querySelector('#prototype').style.display=isDoc?'none':'';document.querySelector('#document').classList.toggle('active',isDoc);document.querySelectorAll('[data-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.mode===mode)));if(isDoc)loadRequirement();}
 document.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>setMode(button.dataset.mode)));
 </script>
-<script src="components/keyboard/keyboard.js?v=keyboard-keymap-4"></script>
+<script src="components/keyboard/preview-editor.js?v=preview-edit-2"></script>
+<script src="components/keyboard/keyboard.js?v=preview-edit-2"></script>
 <script src="app.js?v=tourney-1"></script>
-<script src="catalog.js?v=keyboard-keymap-4"></script>
+<script src="catalog.js?v=preview-edit-2"></script>
 </body>
 </html>
