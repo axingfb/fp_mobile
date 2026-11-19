@@ -170,7 +170,7 @@
     };
     card.querySelector('#submit-login').onclick = () => {
       const error = card.querySelector('.form-error');
-      if (!/^09\d{9}$/.test(values.phone) && !/^9\d{9}$/.test(values.phone)) { error.textContent = 'Enter a valid mobile number.'; return; }
+      if (!values.phone.trim()) { error.textContent = 'Enter your mobile number.'; return; }
       if (!values[key].trim()) { error.textContent = mode === 'OTP' ? 'Enter your OTP.' : 'Enter your password.'; return; }
       signed = true; sync(); closeDialog(false); navigate(walletOrigin ? '/wallet?mode=deposit' : '/');
     };
