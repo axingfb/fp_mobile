@@ -384,3 +384,4 @@
 .wallet-flow .ui-card-body > .ui-btn.primary{display:flex;width:100%;margin-top:max(12px,1.4cqw)}
 .wallet-flow.wallet-confirm .ui-card-body > .ui-btn.primary{margin-top:0}
 .wallet-flow .form-error:empty{display:none}
+.ui-overlay[data-dialog="Terms of Use"] .ui-card-body{display:flex;flex-direction:column;gap:10px}.document-tabs{display:flex;gap:10px;flex:none}.document-tabs .ui-btn{flex:1;min-width:0}.document-tabs .ui-btn.selected{border:2px solid var(--fp-ink)}.document-body{flex:1;min-height:0;overflow:hidden}.document-body .faq-content{height:100%}

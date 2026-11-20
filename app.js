@@ -432,7 +432,7 @@
     card.querySelector('.ui-close').onclick = () => navigate('/account');
   }
   function terms() {
-    shell('Terms of Use', `<article class="faq-content terms-content"><p class="terms-note">Summary for this prototype. <a href="https://client-filplay.filbet2025.com/docs/terms-of-use" target="_blank" rel="noopener noreferrer">Read the full Terms of Use</a>.</p>
+    const documents = {terms: `<article class="faq-content terms-content" role="tabpanel" id="document-panel" aria-labelledby="document-terms"><p class="terms-note">Summary for this prototype. <a href="https://filplay.com/docs/terms-of-use" target="_blank" rel="noopener noreferrer">Read the full Terms of Use</a>.</p>
       <section><h3>I. General Introduction and Definition</h3><p>Filplay states that it is operated by GoTech Entertainment Inc. and licensed and supervised by PAGCOR. The terms govern use of the platform and may be amended. Platform and game materials remain the property of their respective rights holders.</p></section>
       <section><h3>II. Member's Basic Information</h3><p>Registration requires the requested information, a valid government-issued ID and a selfie holding it. Players must be at least 21 and eligible under the stated restrictions.</p></section>
       <section><h3>III. Communications Opt In</h3><p>Filplay may communicate administrative, legally required and promotional information through channels including email, SMS, calls and social media.</p></section>
@@ -442,7 +442,23 @@
       <section><h3>VII. Transaction Policy</h3><p>Transactions may be reviewed for compliance. Payment account names must match the registered account holder. The policy also describes refund conditions and verification requirements.</p></section>
       <section><h3>VIII. Taxes</h3><p>Winnings are subject to applicable tax rules. The terms describe withholding and the player's responsibilities where applicable taxes are not withheld.</p></section>
       <section><h3>IX. KYC Policy and Responsible Gaming</h3><p>The KYC policy covers identity verification, screening, transaction monitoring and risk assessment. The page also describes responsible gaming, player exclusion and sources of support.</p></section>
-    </article>`);
+    </article>`, privacy: `<article class="faq-content terms-content" role="tabpanel" id="document-panel" aria-labelledby="document-privacy"><p class="terms-note">Summary for this prototype. <a href="https://filplay.com/docs/privacy-policy" target="_blank" rel="noopener noreferrer">Read the full Privacy Policy</a>.</p>
+<section><h3>Privacy Commitment</h3><p>Filplay describes how it handles personal information in connection with its services and refers to the Philippines' Data Privacy Act of 2012. The policy is intended to be read alongside the Terms of Use.</p></section>
+<section><h3>Information Collected</h3><p>The policy lists identity and contact information, identification images, financial and transaction data, technical and device data, profile and usage information, and marketing preferences. It also describes the use of aggregated data.</p></section>
+<section><h3>Data Collection Method</h3><p>The policy describes using information for communications, identity checks, analysis, surveys, purchases, security and regulatory compliance.</p></section>
+<section><h3>Access and Opt-out</h3><p>Promotional communications may be opted out of through available site, service or SMS options, or by contacting chat support.</p></section>
+<section><h3>Information Use</h3><p>The policy describes circumstances in which information may be shared with regulators and fraud-prevention organizations, affiliates, operational providers and other relevant bodies, as well as measures for secure processing.</p></section>
+<section><h3>Cookies</h3><p>Filplay and authorized partners may use cookies and similar features to understand usage and improve services. Browser settings can be used to refuse cookies, though some functions may be affected.</p></section>
+<section><h3>Consent and Obligations</h3><p>Users are asked to keep their information accurate and current. The policy describes the consequences of inaccurate information and how consent relates to registration and continued use.</p></section>
+<section><h3>Questions and Concerns</h3><p>Questions can be directed to Filplay's live chat support.</p></section></article>`};
+    shell('Terms of Use', `<div class="document-tabs" role="tablist" aria-label="Documents"><button type="button" class="ui-btn selected" role="tab" id="document-terms" aria-controls="document-panel" aria-selected="true" data-document="terms">Terms of Use</button><button type="button" class="ui-btn" role="tab" id="document-privacy" aria-controls="document-panel" aria-selected="false" data-document="privacy">Privacy Policy</button></div><div class="document-body"></div>`);
+    const body = card.querySelector('.document-body');
+    const activate = key => {
+      body.innerHTML = documents[key];
+      card.querySelectorAll('[data-document]').forEach(button => { const selected = button.dataset.document === key; button.classList.toggle('selected', selected); button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1; });
+    };
+    card.querySelectorAll('[data-document]').forEach(button => { button.onclick = () => activate(button.dataset.document); button.onkeydown = event => { if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return; event.preventDefault(); const target = button.dataset.document === 'terms' ? 'privacy' : 'terms'; activate(target); card.querySelector(`[data-document="${target}"]`).focus(); }; });
+    activate('terms');
     card.querySelector('.ui-close').onclick = () => navigate('/account');
   }
   function blockAccount() {
