@@ -16,3 +16,7 @@ build/
 
 # Local design references and document preview; never publish by default.
 .local-design/
+
+# Temporary browser snapshot staging and Python bytecode.
+page-map/.capture-*/
+scripts/__pycache__/

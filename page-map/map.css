@@ -1,0 +1,64 @@
+.page-map {
+  min-height: 100dvh;
+  padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) 88px max(24px, env(safe-area-inset-left));
+  background: var(--fp-page-background);
+  font: 700 14px var(--fp-font);
+  color: var(--fp-text);
+}
+.page-map-shell { max-width: 1320px; margin: 0 auto; }
+.page-map h1 { margin: 0 0 16px; color: white; font-size: 20px; font-weight: 900; }
+#page-map-modules { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+#page-map-modules:empty { display: none; }
+#page-map-modules .selected { border-color: var(--fp-ink); }
+.page-map-group {
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 2px solid var(--fp-cream);
+  border-radius: 14px;
+  background: var(--fp-panel-surface);
+  box-shadow: 0 3px var(--fp-outline);
+}
+.page-map-group h2, .page-map-detail h2 { margin: 0; font-size: 16px; color: var(--fp-ink); }
+.page-map-count { margin-inline-start: 8px; color: var(--fp-muted); font-size: 12px; }
+.page-map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.page-map-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--fp-outline);
+  border-radius: 8px;
+  background: var(--fp-cream-surface);
+  color: var(--fp-ink);
+  font-weight: 800;
+  text-align: start;
+  cursor: zoom-in;
+  transition: transform 150ms;
+}
+.page-map-tile:active { transform: scale(.98); }
+.page-map :focus-visible, .switcher button:focus-visible { outline: 3px solid var(--fp-gold); outline-offset: 2px; }
+.page-map-tile img, .page-map-full { display: block; width: 100%; height: auto; aspect-ratio: 852 / 393; object-fit: contain; border-radius: 5px; }
+.page-map-detail {
+  width: min(94vw, 888px);
+  max-height: 94dvh;
+  padding: 12px;
+  border: 2px solid var(--fp-cream);
+  border-radius: 14px;
+  background: var(--fp-panel-surface);
+  box-shadow: 0 3px var(--fp-outline);
+}
+.page-map-detail::backdrop { background: #512b2bc0; }
+.page-map-detail-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.page-map-detail-bar .ui-btn { min-width: 44px; padding: 0; }
+.page-map-full { max-height: calc(94dvh - 80px); }
+.switcher { z-index: 51; }
+body:not([data-view="prototype"]) .support-page { display: none; }
+@media (prefers-reduced-motion: reduce) { .page-map-tile { transition: none; } }
+#prototype[hidden] { display: none; }
+.page-map .ui-btn { min-height: 44px; font-size: 14px; }

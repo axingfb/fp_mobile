@@ -1,0 +1,566 @@
+{
+  "groups": [
+    {
+      "id": "lobby",
+      "name": "大厅",
+      "screens": [
+        {
+          "id": "home",
+          "title": "大厅",
+          "image": "images/lobby/home-46c8ee5b83fdc271.jpg"
+        },
+        {
+          "id": "guest",
+          "title": "访客大厅",
+          "image": "images/lobby/guest-09178ae0e4d3f25b.jpg"
+        }
+      ]
+    },
+    {
+      "id": "login",
+      "name": "登录",
+      "screens": [
+        {
+          "id": "otp",
+          "title": "OTP 登录",
+          "image": "images/login/otp-77cf12e2d6afe428.jpg"
+        },
+        {
+          "id": "password",
+          "title": "密码登录",
+          "image": "images/login/password-032766d5d55bb0b5.jpg"
+        },
+        {
+          "id": "phone-keyboard",
+          "title": "手机号键盘",
+          "image": "images/login/phone-keyboard-2bc463bf5268f871.jpg"
+        },
+        {
+          "id": "otp-keyboard",
+          "title": "验证码键盘",
+          "image": "images/login/otp-keyboard-2ecddb2bdcf06996.jpg"
+        },
+        {
+          "id": "password-keyboard",
+          "title": "密码键盘",
+          "image": "images/login/password-keyboard-2e51652086e92313.jpg"
+        }
+      ]
+    },
+    {
+      "id": "account",
+      "name": "个人中心",
+      "screens": [
+        {
+          "id": "overview",
+          "title": "My Account",
+          "image": "images/account/overview-4c4552bc265943a0.jpg"
+        },
+        {
+          "id": "avatar",
+          "title": "My Account · 选择头像",
+          "image": "images/account/avatar-aadd150e802ebffd.jpg"
+        },
+        {
+          "id": "nickname",
+          "title": "My Account · 修改昵称",
+          "image": "images/account/nickname-1f7c8e36974d164f.jpg"
+        },
+        {
+          "id": "login-password",
+          "title": "My Account · 登录密码",
+          "image": "images/account/login-password-b424d90383b4fd0b.jpg"
+        },
+        {
+          "id": "wallet-password",
+          "title": "My Account · 钱包密码",
+          "image": "images/account/wallet-password-be8657c8479a5e15.jpg"
+        },
+        {
+          "id": "kyc-upload",
+          "title": "KYC · 上传证件",
+          "image": "images/account/kyc-upload-68f3808aac9f1485.jpg"
+        },
+        {
+          "id": "kyc-types",
+          "title": "KYC · 证件类型",
+          "image": "images/account/kyc-types-81932033008a8235.jpg"
+        },
+        {
+          "id": "kyc-basic",
+          "title": "KYC · 基本资料",
+          "image": "images/account/kyc-basic-e6707982b6de1e39.jpg"
+        },
+        {
+          "id": "kyc-address",
+          "title": "KYC · 地址及收入",
+          "image": "images/account/kyc-address-4455f46525b586ad.jpg"
+        },
+        {
+          "id": "gcash",
+          "title": "Fund Accounts · GCash",
+          "image": "images/account/gcash-9e90466573fec121.jpg"
+        },
+        {
+          "id": "bank",
+          "title": "Fund Accounts · Bank",
+          "image": "images/account/bank-998d38577e78f240.jpg"
+        },
+        {
+          "id": "maya",
+          "title": "Fund Accounts · Maya",
+          "image": "images/account/maya-19ab88839f517d5b.jpg"
+        },
+        {
+          "id": "fund-requirements",
+          "title": "Fund Accounts · 安全要求",
+          "image": "images/account/fund-requirements-8d7eb8ff261f72ea.jpg"
+        },
+        {
+          "id": "add-gcash",
+          "title": "Fund Accounts · 添加 GCash",
+          "image": "images/account/add-gcash-c9139055323ee186.jpg"
+        },
+        {
+          "id": "add-bank",
+          "title": "Fund Accounts · 添加 Bank",
+          "image": "images/account/add-bank-a30cd1a425d0d799.jpg"
+        },
+        {
+          "id": "add-maya",
+          "title": "Fund Accounts · 添加 Maya",
+          "image": "images/account/add-maya-fe53d22c528027e3.jpg"
+        },
+        {
+          "id": "fund-password",
+          "title": "Fund Accounts · 验证钱包密码",
+          "image": "images/account/fund-password-2da5537a35c04653.jpg"
+        },
+        {
+          "id": "fund-remove",
+          "title": "Fund Accounts · 删除确认",
+          "image": "images/account/fund-remove-ad16824cc374f3b3.jpg"
+        },
+        {
+          "id": "fund-remove-verify",
+          "title": "Fund Accounts · 删除验证",
+          "image": "images/account/fund-remove-verify-e45ce4fdb3f5fd39.jpg"
+        },
+        {
+          "id": "deposit",
+          "title": "Transactions · Deposit",
+          "image": "images/account/deposit-ea19600d3cf41953.jpg"
+        },
+        {
+          "id": "withdrawal",
+          "title": "Transactions · Withdrawal",
+          "image": "images/account/withdrawal-87baf0b52c2077eb.jpg"
+        },
+        {
+          "id": "game",
+          "title": "Transactions · Game",
+          "image": "images/account/game-dd8bed8fa2f1ee00.jpg"
+        },
+        {
+          "id": "reward",
+          "title": "Transactions · Reward",
+          "image": "images/account/reward-4cf94bdab5135d8b.jpg"
+        },
+        {
+          "id": "deposit-detail",
+          "title": "Transactions · Deposit / 详情",
+          "image": "images/account/deposit-detail-d4e1fe1813f29b2b.jpg"
+        },
+        {
+          "id": "withdrawal-detail",
+          "title": "Transactions · Withdrawal / 详情",
+          "image": "images/account/withdrawal-detail-6574f7a9072ad215.jpg"
+        },
+        {
+          "id": "responsible",
+          "title": "Responsible Gaming",
+          "image": "images/account/responsible-87f4fd0881569e09.jpg"
+        },
+        {
+          "id": "gaming-schedule",
+          "title": "Responsible Gaming · 时段设置",
+          "image": "images/account/gaming-schedule-f44f994ce0135ee3.jpg"
+        },
+        {
+          "id": "block",
+          "title": "Responsible Gaming · 停用账号",
+          "image": "images/account/block-d6f00936c3255951.jpg"
+        },
+        {
+          "id": "settings",
+          "title": "Settings & Help",
+          "image": "images/account/settings-c7d6cf8b74f7745a.jpg"
+        },
+        {
+          "id": "faq",
+          "title": "Settings & Help · FAQ",
+          "image": "images/account/faq-610c648b91f2717d.jpg"
+        },
+        {
+          "id": "terms",
+          "title": "Settings & Help · Terms",
+          "image": "images/account/terms-5d0350ecf251dede.jpg"
+        },
+        {
+          "id": "logout",
+          "title": "退出登录",
+          "image": "images/account/logout-548c0892f9ba46fe.jpg"
+        }
+      ]
+    },
+    {
+      "id": "catalog",
+      "name": "游戏目录",
+      "screens": [
+        {
+          "id": "slot",
+          "title": "Slots",
+          "image": "images/catalog/slot-13cd4087fc92969f.jpg"
+        },
+        {
+          "id": "casino",
+          "title": "Casino",
+          "image": "images/catalog/casino-35ebc8834e76ebe9.jpg"
+        },
+        {
+          "id": "poker",
+          "title": "Poker",
+          "image": "images/catalog/poker-ebc48e48fff3f75a.jpg"
+        },
+        {
+          "id": "arcade",
+          "title": "Arcade",
+          "image": "images/catalog/arcade-f9ba13270d8e9932.jpg"
+        },
+        {
+          "id": "bingo",
+          "title": "Bingo",
+          "image": "images/catalog/bingo-0aa414aad119fa95.jpg"
+        },
+        {
+          "id": "fishing",
+          "title": "Fishing",
+          "image": "images/catalog/fishing-bf51c4ce2caea93d.jpg"
+        },
+        {
+          "id": "history-empty",
+          "title": "游戏历史 · 空状态",
+          "image": "images/catalog/history-empty-f13e4996aecb044b.jpg"
+        },
+        {
+          "id": "history",
+          "title": "游戏历史 · 有记录",
+          "image": "images/catalog/history-913eeae5004a52f3.jpg"
+        },
+        {
+          "id": "search",
+          "title": "搜索游戏",
+          "image": "images/catalog/search-d66437bccf85384f.jpg"
+        },
+        {
+          "id": "search-results",
+          "title": "搜索结果",
+          "image": "images/catalog/search-results-5748ef71f139777a.jpg"
+        },
+        {
+          "id": "search-empty",
+          "title": "搜索 · 无结果",
+          "image": "images/catalog/search-empty-7aa53f1fa0fc92a4.jpg"
+        },
+        {
+          "id": "search-keyboard",
+          "title": "搜索键盘",
+          "image": "images/catalog/search-keyboard-c2b620920209ee04.jpg"
+        }
+      ]
+    },
+    {
+      "id": "games",
+      "name": "游戏",
+      "screens": [
+        {
+          "id": "loading",
+          "title": "加载游戏",
+          "image": "images/games/loading-16c838d2be897ba7.jpg"
+        },
+        {
+          "id": "game-1",
+          "title": "Fortune Treasures",
+          "image": "images/games/game-1-633c028ae3d3025d.jpg"
+        },
+        {
+          "id": "game-2",
+          "title": "Super Ace",
+          "image": "images/games/game-2-633c028ae3d3025d.jpg"
+        },
+        {
+          "id": "game-3",
+          "title": "Gold Miner",
+          "image": "images/games/game-3-633c028ae3d3025d.jpg"
+        },
+        {
+          "id": "game-4",
+          "title": "Lucky Slots",
+          "image": "images/games/game-4-633c028ae3d3025d.jpg"
+        },
+        {
+          "id": "game-5",
+          "title": "777",
+          "image": "images/games/game-5-633c028ae3d3025d.jpg"
+        },
+        {
+          "id": "game-6",
+          "title": "Sugar Rush",
+          "image": "images/games/game-6-633c028ae3d3025d.jpg"
+        },
+        {
+          "id": "menu",
+          "title": "游戏内快捷菜单",
+          "image": "images/games/menu-5b828a5cb27ee2a0.jpg"
+        }
+      ]
+    },
+    {
+      "id": "promos",
+      "name": "Promos",
+      "screens": [
+        {
+          "id": "cashback",
+          "title": "Loss Cashback",
+          "image": "images/promos/cashback-36cdace7927c7059.jpg"
+        },
+        {
+          "id": "rebate",
+          "title": "Daily Rebate",
+          "image": "images/promos/rebate-b384834cb9489b2a.jpg"
+        },
+        {
+          "id": "deposit-1",
+          "title": "1st Deposit",
+          "image": "images/promos/deposit-1-9e99962c69c3a811.jpg"
+        },
+        {
+          "id": "deposit-2",
+          "title": "2nd Deposit",
+          "image": "images/promos/deposit-2-50318eb437bf12af.jpg"
+        },
+        {
+          "id": "deposit-3",
+          "title": "3rd Deposit",
+          "image": "images/promos/deposit-3-1219ec26aa02e63d.jpg"
+        },
+        {
+          "id": "terms",
+          "title": "Standard T&C",
+          "image": "images/promos/terms-1107a5165faf9a3e.jpg"
+        }
+      ]
+    },
+    {
+      "id": "tourney",
+      "name": "Tourney",
+      "screens": [
+        {
+          "id": "MI-leaderboard",
+          "title": "MI · Leaderboard",
+          "image": "images/tourney/MI-leaderboard-54933b627c75a7a6.jpg"
+        },
+        {
+          "id": "MI-prizes",
+          "title": "MI · Prizes",
+          "image": "images/tourney/MI-prizes-0b3b3121e60e5cc1.jpg"
+        },
+        {
+          "id": "MI-rules",
+          "title": "MI · Rules",
+          "image": "images/tourney/MI-rules-16c3800ff26cccec.jpg"
+        },
+        {
+          "id": "JILI-leaderboard",
+          "title": "JILI · Leaderboard",
+          "image": "images/tourney/JILI-leaderboard-990586f5dcac5df3.jpg"
+        },
+        {
+          "id": "JILI-prizes",
+          "title": "JILI · Prizes",
+          "image": "images/tourney/JILI-prizes-0d4600aabc9e0d32.jpg"
+        },
+        {
+          "id": "JILI-rules",
+          "title": "JILI · Rules",
+          "image": "images/tourney/JILI-rules-a04ade6edb306291.jpg"
+        },
+        {
+          "id": "Slots-leaderboard",
+          "title": "Slots · Leaderboard",
+          "image": "images/tourney/Slots-leaderboard-4a9b4b08d09a30a7.jpg"
+        },
+        {
+          "id": "Slots-prizes",
+          "title": "Slots · Prizes",
+          "image": "images/tourney/Slots-prizes-568230ffb8a92d02.jpg"
+        },
+        {
+          "id": "Slots-rules",
+          "title": "Slots · Rules",
+          "image": "images/tourney/Slots-rules-5f5863a80962212f.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bag",
+      "name": "Bag",
+      "screens": [
+        {
+          "id": "available",
+          "title": "Available",
+          "image": "images/bag/available-9913a27e3cd29ba7.jpg"
+        },
+        {
+          "id": "in_use",
+          "title": "In Use",
+          "image": "images/bag/in_use-40c0a51889861f61.jpg"
+        },
+        {
+          "id": "ended",
+          "title": "Ended",
+          "image": "images/bag/ended-6cc97051d8946671.jpg"
+        },
+        {
+          "id": "history",
+          "title": "History",
+          "image": "images/bag/history-f78c95009efc8b1d.jpg"
+        },
+        {
+          "id": "wager",
+          "title": "Wager Requirement",
+          "image": "images/bag/wager-43e454daa41289e4.jpg"
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "name": "App",
+      "screens": [
+        {
+          "id": "home",
+          "title": "App",
+          "image": "images/app/home-6f7195ef252cb7ac.jpg"
+        }
+      ]
+    },
+    {
+      "id": "wallet",
+      "name": "Wallet",
+      "screens": [
+        {
+          "id": "deposit-gcash",
+          "title": "Deposit · GCash",
+          "image": "images/wallet/deposit-gcash-09a9c307f984a93c.jpg"
+        },
+        {
+          "id": "deposit-qrph",
+          "title": "Deposit · QRPH",
+          "image": "images/wallet/deposit-qrph-5d1be18e7dffd427.jpg"
+        },
+        {
+          "id": "deposit-maya",
+          "title": "Deposit · MAYA",
+          "image": "images/wallet/deposit-maya-13879cd9ba7bc788.jpg"
+        },
+        {
+          "id": "withdraw-bank",
+          "title": "Withdrawal · BANK",
+          "image": "images/wallet/withdraw-bank-c5581dd990411b27.jpg"
+        },
+        {
+          "id": "withdraw-maya",
+          "title": "Withdrawal · MAYA",
+          "image": "images/wallet/withdraw-maya-d872fb06247e779d.jpg"
+        },
+        {
+          "id": "withdraw-gcash",
+          "title": "Withdrawal · GCash",
+          "image": "images/wallet/withdraw-gcash-8ca63689914ad3a9.jpg"
+        },
+        {
+          "id": "deposit-kyc",
+          "title": "Deposit · KYC 提示",
+          "image": "images/wallet/deposit-kyc-fc666b7fcb3c7816.jpg"
+        },
+        {
+          "id": "deposit-confirm",
+          "title": "Deposit · 确认",
+          "image": "images/wallet/deposit-confirm-ed5815c983706b0f.jpg"
+        },
+        {
+          "id": "deposit-result",
+          "title": "Deposit · 支付预览",
+          "image": "images/wallet/deposit-result-7fb90fe678acacd6.jpg"
+        },
+        {
+          "id": "withdraw-confirm",
+          "title": "Withdrawal · 确认",
+          "image": "images/wallet/withdraw-confirm-3f295d6041f7ca08.jpg"
+        },
+        {
+          "id": "withdraw-accounts",
+          "title": "Withdrawal · 选择账户",
+          "image": "images/wallet/withdraw-accounts-2a7efde7ba24ac2a.jpg"
+        },
+        {
+          "id": "withdraw-requirements",
+          "title": "Withdrawal · 安全要求",
+          "image": "images/wallet/withdraw-requirements-400e70e2e4e732ab.jpg"
+        },
+        {
+          "id": "withdraw-password",
+          "title": "Withdrawal · 验证密码",
+          "image": "images/wallet/withdraw-password-9a6ce36aab946749.jpg"
+        },
+        {
+          "id": "withdraw-success",
+          "title": "Withdrawal · 提交成功",
+          "image": "images/wallet/withdraw-success-963adcff1eb16790.jpg"
+        }
+      ]
+    },
+    {
+      "id": "support",
+      "name": "客服",
+      "screens": [
+        {
+          "id": "chat",
+          "title": "Customer Service",
+          "image": "images/support/chat-04cbdf7fc18e5099.jpg"
+        },
+        {
+          "id": "keyboard",
+          "title": "Customer Service · 聊天键盘",
+          "image": "images/support/keyboard-cf243a41fa7310af.jpg"
+        }
+      ]
+    },
+    {
+      "id": "keyboard",
+      "name": "键盘组件",
+      "screens": [
+        {
+          "id": "numeric",
+          "title": "弹窗式数字键盘",
+          "image": "images/keyboard/numeric-06da1554c832118d.jpg"
+        },
+        {
+          "id": "letters",
+          "title": "弹窗式字母键盘",
+          "image": "images/keyboard/letters-254a8b52811089bc.jpg"
+        }
+      ]
+    }
+  ]
+}

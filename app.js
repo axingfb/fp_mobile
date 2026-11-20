@@ -757,7 +757,7 @@
   overlay.onpointerdown = event => { backdropPress = event.target === overlay; };
   overlay.onclick = event => { if (event.target === overlay && backdropPress) { if(card?.classList.contains('wallet-flow'))card.querySelector('.ui-close').click();else dismiss(); } };
   document.addEventListener('keydown', event => {
-    if (!overlay.classList.contains('open')) return;
+    if (stage.closest('[hidden]') || !overlay.classList.contains('open')) return;
     if (event.key === 'Escape') { event.preventDefault(); if(card?.classList.contains('wallet-flow'))card.querySelector('.ui-close').click();else dismiss(); }
     if (event.key !== 'Tab') return;
     const nodes = [...overlay.querySelectorAll('button:not(:disabled),input,a[href]')].filter(node => node.getClientRects().length);

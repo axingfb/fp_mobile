@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="components/ui/theme.css">
 <link rel="stylesheet" href="app.css?v=promos-title-2lines">
 <link rel="stylesheet" href="components/keyboard/keyboard.css?v=preview-edit-2">
+<link rel="stylesheet" href="page-map/map.css">
 </head>
 <body>
 <main id="prototype" class="prototype">
@@ -39,7 +40,21 @@
   </section>
 </main>
 <main id="document" class="document" aria-label="需求文档"><div class="document-shell"><header class="doc-header"><div class="doc-kicker">FILPLAY MOBILE / DOCUMENTATION</div><h1>产品需求文档</h1><p>项目统一需求文档 · requirement.md</p></header><article id="content" class="markdown" aria-live="polite">正在加载需求文档…</article></div></main>
-<nav class="switcher" aria-label="视图模式"><button type="button" data-mode="prototype" aria-pressed="true" aria-label="原型模式" title="原型模式"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg></button><button type="button" data-mode="document" aria-pressed="false" aria-label="文档模式" title="文档模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4M9 12h7M9 16h7"/></svg></button></nav>
+<main id="page-map" class="page-map" hidden aria-labelledby="page-map-title">
+  <div class="page-map-shell">
+    <h1 id="page-map-title">全局页面地图</h1>
+    <nav id="page-map-modules" aria-label="页面模块"></nav>
+    <div id="page-map-groups" aria-live="polite"></div>
+  </div>
+  <dialog id="page-map-detail" class="page-map-detail" aria-labelledby="page-map-caption">
+    <div class="page-map-detail-bar">
+      <h2 id="page-map-caption"></h2>
+      <button type="button" class="ui-btn" aria-label="关闭截图"><img class="ui-icon" src="components/ui/icons/close.svg" alt=""></button>
+    </div>
+    <img class="page-map-full" alt="">
+  </dialog>
+</main>
+<nav class="switcher" aria-label="视图模式"><button type="button" data-mode="prototype" aria-pressed="true" aria-label="原型模式" title="原型模式"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg></button><button type="button" data-mode="document" aria-pressed="false" aria-label="文档模式" title="文档模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4M9 12h7M9 16h7"/></svg></button><button type="button" data-mode="map" aria-pressed="false" aria-label="全局页面地图" title="全局页面地图"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/></svg></button></nav>
 <script>
 function updateRoute(){const detail=/^#\/(game|category)\/[^/]+/.test(location.hash);document.querySelector('.stage').classList.toggle('detail-open',detail);document.querySelector('.detail').classList.toggle('active',detail);}
 window.addEventListener('hashchange',updateRoute);updateRoute();
@@ -65,12 +80,11 @@ function renderMarkdown(source){
  flush();closeList();if(code)html+='<pre><code>'+escapeHtml(codeLines.join('\n'))+'</code></pre>';return html;
 }
 async function loadRequirement(){content.textContent='正在加载需求文档…';try{const response=await fetch(new URL('requirement.md',document.baseURI),{cache:'no-store'});if(!response.ok)throw new Error('HTTP '+response.status);content.innerHTML=renderMarkdown(await response.text());}catch(error){content.innerHTML='<div class="error">无法加载 requirement.md。请通过网页服务器访问，并确认文件已部署到项目根目录。</div>';}}
-function setMode(mode){const isDoc=mode==='document';document.querySelector('#prototype').hidden=isDoc;document.querySelector('#prototype').style.display=isDoc?'none':'';document.querySelector('#document').classList.toggle('active',isDoc);document.querySelectorAll('[data-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.mode===mode)));if(isDoc)loadRequirement();}
-document.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>setMode(button.dataset.mode)));
 </script>
 <script src="components/keyboard/preview-editor.js?v=preview-edit-2"></script>
 <script src="components/keyboard/keyboard.js?v=preview-edit-2"></script>
 <script src="app.js?v=tourney-1"></script>
 <script src="catalog.js?v=preview-edit-2"></script>
+<script src="page-map/map.js"></script>
 </body>
 </html>
