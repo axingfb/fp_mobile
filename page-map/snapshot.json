@@ -12,7 +12,7 @@
         {
           "id": "guest",
           "title": "访客大厅",
-          "image": "images/lobby/guest-09178ae0e4d3f25b.jpg"
+          "image": "images/lobby/guest-cb7f0ea1651b5e7e.jpg"
         }
       ]
     },
@@ -114,7 +114,7 @@
         {
           "id": "fund-requirements",
           "title": "Fund Accounts · 安全要求",
-          "image": "images/account/fund-requirements-8d7eb8ff261f72ea.jpg"
+          "image": "images/account/fund-requirements-24cf7290f2e469a1.jpg"
         },
         {
           "id": "add-gcash",
@@ -134,27 +134,27 @@
         {
           "id": "fund-password",
           "title": "Fund Accounts · 验证钱包密码",
-          "image": "images/account/fund-password-2da5537a35c04653.jpg"
+          "image": "images/account/fund-password-472ea25c7b05bf4e.jpg"
         },
         {
           "id": "fund-remove",
           "title": "Fund Accounts · 删除确认",
-          "image": "images/account/fund-remove-ad16824cc374f3b3.jpg"
+          "image": "images/account/fund-remove-4945937dbb181a45.jpg"
         },
         {
           "id": "fund-remove-verify",
           "title": "Fund Accounts · 删除验证",
-          "image": "images/account/fund-remove-verify-e45ce4fdb3f5fd39.jpg"
+          "image": "images/account/fund-remove-verify-f24e7db21fedaf86.jpg"
         },
         {
           "id": "deposit",
           "title": "Transactions · Deposit",
-          "image": "images/account/deposit-ea19600d3cf41953.jpg"
+          "image": "images/account/deposit-9b2bd4a21e19f3ed.jpg"
         },
         {
           "id": "withdrawal",
           "title": "Transactions · Withdrawal",
-          "image": "images/account/withdrawal-87baf0b52c2077eb.jpg"
+          "image": "images/account/withdrawal-a8412aaf2e7d7d83.jpg"
         },
         {
           "id": "game",
@@ -164,22 +164,22 @@
         {
           "id": "reward",
           "title": "Transactions · Reward",
-          "image": "images/account/reward-4cf94bdab5135d8b.jpg"
+          "image": "images/account/reward-d6cb0d82f4ba7dd2.jpg"
         },
         {
           "id": "deposit-detail",
           "title": "Transactions · Deposit / 详情",
-          "image": "images/account/deposit-detail-d4e1fe1813f29b2b.jpg"
+          "image": "images/account/deposit-detail-10c55faf52a4e152.jpg"
         },
         {
           "id": "withdrawal-detail",
           "title": "Transactions · Withdrawal / 详情",
-          "image": "images/account/withdrawal-detail-6574f7a9072ad215.jpg"
+          "image": "images/account/withdrawal-detail-7fd8555c9f2a357a.jpg"
         },
         {
           "id": "responsible",
           "title": "Responsible Gaming",
-          "image": "images/account/responsible-87f4fd0881569e09.jpg"
+          "image": "images/account/responsible-963f0c8f86ffa409.jpg"
         },
         {
           "id": "gaming-schedule",
@@ -194,7 +194,7 @@
         {
           "id": "settings",
           "title": "Settings & Help",
-          "image": "images/account/settings-c7d6cf8b74f7745a.jpg"
+          "image": "images/account/settings-19401901cd33c091.jpg"
         },
         {
           "id": "faq",
@@ -203,8 +203,8 @@
         },
         {
           "id": "terms",
-          "title": "Settings & Help · Terms",
-          "image": "images/account/terms-5d0350ecf251dede.jpg"
+          "title": "Settings & Help · Terms & Privacy",
+          "image": "images/account/terms-f6a9fa63fb4eaa1e.jpg"
         },
         {
           "id": "logout",
@@ -225,7 +225,7 @@
         {
           "id": "casino",
           "title": "Casino",
-          "image": "images/catalog/casino-35ebc8834e76ebe9.jpg"
+          "image": "images/catalog/casino-2a306baf45dae81b.jpg"
         },
         {
           "id": "poker",
@@ -332,7 +332,7 @@
         {
           "id": "cashback",
           "title": "Loss Cashback",
-          "image": "images/promos/cashback-36cdace7927c7059.jpg"
+          "image": "images/promos/cashback-e410d027bb568d5a.jpg"
         },
         {
           "id": "rebate",
@@ -368,47 +368,47 @@
         {
           "id": "MI-leaderboard",
           "title": "MI · Leaderboard",
-          "image": "images/tourney/MI-leaderboard-54933b627c75a7a6.jpg"
+          "image": "images/tourney/MI-leaderboard-bf97529de35e6479.jpg"
         },
         {
           "id": "MI-prizes",
           "title": "MI · Prizes",
-          "image": "images/tourney/MI-prizes-0b3b3121e60e5cc1.jpg"
+          "image": "images/tourney/MI-prizes-50b5474e4d728a92.jpg"
         },
         {
           "id": "MI-rules",
           "title": "MI · Rules",
-          "image": "images/tourney/MI-rules-16c3800ff26cccec.jpg"
+          "image": "images/tourney/MI-rules-a0e2f3e8b7aa0cd9.jpg"
         },
         {
           "id": "JILI-leaderboard",
           "title": "JILI · Leaderboard",
-          "image": "images/tourney/JILI-leaderboard-990586f5dcac5df3.jpg"
+          "image": "images/tourney/JILI-leaderboard-8cae0d3c53b0b9eb.jpg"
         },
         {
           "id": "JILI-prizes",
           "title": "JILI · Prizes",
-          "image": "images/tourney/JILI-prizes-0d4600aabc9e0d32.jpg"
+          "image": "images/tourney/JILI-prizes-e26fe27771d1322a.jpg"
         },
         {
           "id": "JILI-rules",
           "title": "JILI · Rules",
-          "image": "images/tourney/JILI-rules-a04ade6edb306291.jpg"
+          "image": "images/tourney/JILI-rules-a009b433af9e8d83.jpg"
         },
         {
           "id": "Slots-leaderboard",
           "title": "Slots · Leaderboard",
-          "image": "images/tourney/Slots-leaderboard-4a9b4b08d09a30a7.jpg"
+          "image": "images/tourney/Slots-leaderboard-17655fbf69dfb362.jpg"
         },
         {
           "id": "Slots-prizes",
           "title": "Slots · Prizes",
-          "image": "images/tourney/Slots-prizes-568230ffb8a92d02.jpg"
+          "image": "images/tourney/Slots-prizes-36b7d407992dd675.jpg"
         },
         {
           "id": "Slots-rules",
           "title": "Slots · Rules",
-          "image": "images/tourney/Slots-rules-5f5863a80962212f.jpg"
+          "image": "images/tourney/Slots-rules-17370345f5e109fc.jpg"
         }
       ]
     },
@@ -542,7 +542,7 @@
         {
           "id": "keyboard",
           "title": "Customer Service · 聊天键盘",
-          "image": "images/support/keyboard-cf243a41fa7310af.jpg"
+          "image": "images/support/keyboard-c7ccc07b31947c43.jpg"
         }
       ]
     },

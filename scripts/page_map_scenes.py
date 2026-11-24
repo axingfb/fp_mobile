@@ -97,7 +97,7 @@ GROUPS = [
         scene('block', 'Responsible Gaming · 停用账号', '/account/block-confirm', '.block-scroll'),
         scene('settings', 'Settings & Help', '/account/settings', '.center-content'),
         scene('faq', 'Settings & Help · FAQ', '/account/faq', '.ui-overlay.open'),
-        scene('terms', 'Settings & Help · Terms', '/account/terms', '.ui-overlay.open'),
+        scene('terms', 'Settings & Help · Terms & Privacy', '/account/terms', '.ui-overlay.open'),
         scene('logout', '退出登录', '/logout', '#confirm-out'),
     ]),
     group('catalog', '游戏目录', [

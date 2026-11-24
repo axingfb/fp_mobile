@@ -2,6 +2,9 @@
   const stage = document.querySelector('.stage');
   const keyboard = window.fpKeyboard;
   let signed = localStorage.fpSigned !== 'false';
+  const guestLoading = stage.querySelector('.guest-loading');
+  let showGuestLoading = !signed;
+  let guestLoadingTimer = null;
   let name = localStorage.fpName || 'axing';
   let avatar = localStorage.fpAvatar || 'cream';
   let mode = 'OTP', active = null, card, opener = null;
@@ -101,6 +104,7 @@
     if (restore && opener?.isConnected) opener.focus({preventScroll: true});
   }
   function dismiss() {
+    if (['Responsible Gaming', 'Access Restricted'].includes(overlay.dataset.dialog)) return;
     if (fromSecurityRequirements && ['#/account/kyc', '#/account/wallet-password'].includes(location.hash)) { fromSecurityRequirements = false; navigate('/account/security-requirements'); return; }
     if (location.hash === '#/account/remove-fund' || location.hash === '#/account/remove-verify') { pendingRemoval = null; navigate('/account'); return; }
     if (location.hash.split('?')[0] === '#/account/transaction-detail') { navigate('/account'); return; }
@@ -172,8 +176,20 @@
       const error = card.querySelector('.form-error');
       if (!values.phone.trim()) { error.textContent = 'Enter your mobile number.'; return; }
       if (!values[key].trim()) { error.textContent = mode === 'OTP' ? 'Enter your OTP.' : 'Enter your password.'; return; }
+      if (/^\d$/.test(values.phone.trim())) { ndrpRestriction(); return; }
       signed = true; sync(); closeDialog(false); navigate(walletOrigin ? '/wallet?mode=deposit' : '/');
     };
+  }
+  function ndrpRestriction() {
+    signed = false;
+    walletOrigin = false;
+    values.password = '';
+    values.otp = '';
+    sync();
+    shell('Access Restricted', `<div class="ndrp-message"><p>You are listed in the National Database of Restricted Persons and are prohibited from gambling.</p><p>If you believe that this is an error, please contact Filplay for assistance.</p><div class="ndrp-contacts"><a href="tel:09XXXX">09XXXX</a><a href="mailto:Support@filplay.com">Support@filplay.com</a></div><p>For concerns about withdrawals, account access, account verification, transactions, and other account-related matters, please contact Filplay Customer Service: hotline <a class="ndrp-link" href="tel:09XXXX">09XXXX</a> or <a class="ndrp-link" href="#/support">Online Support</a>.</p></div><button type="button" class="ui-btn primary ndrp-ok">OK</button>`);
+    card.querySelector('.ui-close').remove();
+    card.querySelector('.ndrp-ok').onclick = () => { closeDialog(false); navigate('/'); };
+    card.querySelector('.ndrp-ok').focus({preventScroll: true});
   }
   function account() {
     shell('Personal Center', `<div class="center-sidebar"><nav class="account-menu" aria-label="Personal center"></nav><button type="button" class="ui-btn account-logout" id="account-logout">${icon('logout')}<span>Log out</span></button></div><main class="center-content" tabindex="0"></main>`);
@@ -268,7 +284,7 @@
         <div class="gaming-item">${row('Daily Gaming Schedule', toggle('scheduleEnabled', 'Daily Gaming Schedule'))}${gamingDraft.scheduleEnabled ? `<div class="gaming-details"><div class="gaming-times">${['start', 'end'].map(key => `<div class="gaming-time-field"><span>${key === 'start' ? 'Start' : 'End'}</span><button type="button" class="custom-field time-trigger" data-time-trigger="${key}" aria-expanded="${openTime === key}">${gamingDraft[key] || 'Select time'}</button></div>`).join('')}</div>${openTime ? timePicker(openTime) : ''}</div>` : ''}</div>
         <div class="gaming-item">${row('Daily Loss Limit', toggle('lossEnabled', 'Daily Loss Limit'))}${gamingDraft.lossEnabled ? `<div class="gaming-details"><label class="gaming-money"><span>PHP</span><input class="custom-field" type="text" inputmode="none" autocomplete="off" aria-label="Daily loss limit in PHP" data-gaming-field="loss" value="${gamingDraft.loss}"></label></div>` : ''}</div>
         <button type="button" class="center-row gaming-block" id="gaming-block"><span>Block My Account</span>${icon('chevron')}</button>
-      </div><div class="gaming-actions"><button type="button" class="ui-btn" id="gaming-cancel">Cancel</button><button type="button" class="ui-btn primary" id="gaming-confirm">Confirm</button></div>`;
+      </div><section class="gaming-help" aria-labelledby="gaming-help-title"><h3 id="gaming-help-title">Need help?</h3><nav class="gaming-help-links" aria-label="Responsible gaming help"><a href="https://osea.pagcor.ph/" target="_blank" rel="noopener noreferrer">Online Self-Exclusion Application Portal</a><a href="mailto:RGD_exclusion@pagcor.ph">Player Exclusion: RGD_exclusion@pagcor.ph</a><a href="mailto:RGD@pagcor.ph">Other RG concerns: RGD@pagcor.ph</a><a href="https://support.pagcor.ph/" target="_blank" rel="noopener noreferrer">Online Gaming Platform Helpdesk</a></nav><div class="gaming-help-marks" aria-label="Responsible gaming and regulatory information"><a href="https://www.pagcor.ph/" target="_blank" rel="noopener noreferrer" aria-label="PAGCOR"><img src="components/compliance/pagcor.webp" alt="PAGCOR"></a><a href="https://www.npgh.ph/" target="_blank" rel="noopener noreferrer" aria-label="NPGH"><img src="components/compliance/npgh.webp" alt="NPGH"></a><a href="https://www.pagcor.ph/regulatory/responsible-gaming.php" target="_blank" rel="noopener noreferrer" aria-label="Responsible gaming, 21 and above"><img src="components/compliance/age21.webp" alt="21 and above"></a></div></section><div class="gaming-actions"><button type="button" class="ui-btn" id="gaming-cancel">Cancel</button><button type="button" class="ui-btn primary" id="gaming-confirm">Confirm</button></div>`;
       const redraw = () => { const scroll = content.scrollTop; account(); card.querySelector('.center-content').scrollTop = scroll; };
       content.querySelectorAll('[data-gaming-toggle]').forEach(input => input.onchange = () => { gamingDraft[input.dataset.gamingToggle] = input.checked; redraw(); });
       content.querySelectorAll('[data-gaming-field]').forEach(input => input.oninput = () => { gamingDraft[input.dataset.gamingField] = input.value; });
@@ -301,7 +317,7 @@
     } else {
       const soundEnabled = localStorage.fpSound !== 'false';
       const soundSwitch = (id, label, checked, disabled = false) => `<label class="gaming-switch"><input type="checkbox" role="switch" id="${id}" aria-label="${label}" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''}><span aria-hidden="true"></span></label>`;
-      content.innerHTML = `<div class="center-group"><h3>Settings</h3><div class="center-list">${row('Sound', soundSwitch('sound-switch', 'Sound', soundEnabled))}<div class="sound-sub">${row('Music', soundSwitch('music-switch', 'Music', soundEnabled && localStorage.fpMusic !== 'false', !soundEnabled))}${row('Sound effects', soundSwitch('effects-switch', 'Sound effects', soundEnabled && localStorage.fpSoundEffects !== 'false', !soundEnabled))}</div></div></div><div class="center-group"><h3>Help</h3><div class="center-list"><button type="button" class="center-row gaming-block" id="open-faq"><span>FAQ</span>${icon('chevron')}</button></div></div><div class="center-group"><h3>Terms</h3><div class="center-list"><button type="button" class="center-row gaming-block" id="open-terms"><span>Terms of Use</span>${icon('chevron')}</button></div></div>`;
+      content.innerHTML = `<div class="center-group"><h3>Settings</h3><div class="center-list">${row('Sound', soundSwitch('sound-switch', 'Sound', soundEnabled))}<div class="sound-sub">${row('Music', soundSwitch('music-switch', 'Music', soundEnabled && localStorage.fpMusic !== 'false', !soundEnabled))}${row('Sound effects', soundSwitch('effects-switch', 'Sound effects', soundEnabled && localStorage.fpSoundEffects !== 'false', !soundEnabled))}</div></div></div><div class="center-group"><h3>Help</h3><div class="center-list"><button type="button" class="center-row gaming-block" id="open-faq"><span>FAQ</span>${icon('chevron')}</button></div></div><div class="center-group"><h3>Terms</h3><div class="center-list"><button type="button" class="center-row gaming-block" id="open-terms"><span>Terms &amp; Privacy</span>${icon('chevron')}</button></div></div>`;
       content.querySelector('#open-faq').onclick = () => navigate('/account/faq');
       content.querySelector('#open-terms').onclick = () => navigate('/account/terms');
       const sound = content.querySelector('#sound-switch'), music = content.querySelector('#music-switch'), effects = content.querySelector('#effects-switch');
@@ -343,7 +359,7 @@
   }
   function confirmFundRemoval() {
     if (!pendingRemoval || !fundAccounts[pendingRemoval.channel].includes(pendingRemoval.entry)) { pendingRemoval = null; navigate('/account'); return; }
-    shell('Delete Account?', `<p class="confirm-message">Are you sure you want to remove this account?</p><div class="confirm-actions"><button type="button" class="ui-btn" id="cancel-remove">Cancel</button><button type="button" class="ui-btn primary" id="confirm-remove">Delete</button></div>`);
+    shell('Delete Account?', `<p class="confirm-message">Are you sure you want to remove this account? This action cannot be undone.</p><div class="confirm-actions"><button type="button" class="ui-btn" id="cancel-remove">Cancel</button><button type="button" class="ui-btn primary" id="confirm-remove">Delete</button></div>`);
     const cancel = () => { pendingRemoval = null; navigate('/account'); };
     card.querySelector('.ui-close').onclick = card.querySelector('#cancel-remove').onclick = cancel;
     card.querySelector('#confirm-remove').onclick = () => navigate('/account/remove-verify');
@@ -451,7 +467,7 @@
 <section><h3>Cookies</h3><p>Filplay and authorized partners may use cookies and similar features to understand usage and improve services. Browser settings can be used to refuse cookies, though some functions may be affected.</p></section>
 <section><h3>Consent and Obligations</h3><p>Users are asked to keep their information accurate and current. The policy describes the consequences of inaccurate information and how consent relates to registration and continued use.</p></section>
 <section><h3>Questions and Concerns</h3><p>Questions can be directed to Filplay's live chat support.</p></section></article>`};
-    shell('Terms of Use', `<div class="document-tabs" role="tablist" aria-label="Documents"><button type="button" class="ui-btn selected" role="tab" id="document-terms" aria-controls="document-panel" aria-selected="true" data-document="terms">Terms of Use</button><button type="button" class="ui-btn" role="tab" id="document-privacy" aria-controls="document-panel" aria-selected="false" data-document="privacy">Privacy Policy</button></div><div class="document-body"></div>`);
+    shell('Terms & Privacy', `<div class="document-tabs" role="tablist" aria-label="Documents"><button type="button" class="ui-btn selected" role="tab" id="document-terms" aria-controls="document-panel" aria-selected="true" data-document="terms">Terms of Use</button><button type="button" class="ui-btn" role="tab" id="document-privacy" aria-controls="document-panel" aria-selected="false" data-document="privacy">Privacy Policy</button></div><div class="document-body"></div>`);
     const body = card.querySelector('.document-body');
     const activate = key => {
       body.innerHTML = documents[key];
@@ -500,7 +516,15 @@
   function logout() {
     shell('Log out?', '<p class="confirm-message">Are you sure you want to log out?</p><div class="confirm-actions"><button type="button" class="ui-btn" id="cancel-out">Cancel</button><button type="button" class="ui-btn primary" id="confirm-out">Log out</button></div>');
     card.querySelector('#cancel-out').onclick = card.querySelector('.ui-close').onclick = () => navigate('/account');
-    card.querySelector('#confirm-out').onclick = () => { signed = false; values.password = ''; values.otp = ''; sync(); closeDialog(false); navigate('/'); };
+    card.querySelector('#confirm-out').onclick = () => {
+      signed = false;
+      showGuestLoading = true;
+      values.password = '';
+      values.otp = '';
+      sync();
+      closeDialog(false);
+      navigate('/');
+    };
   }
   function secondary(title, backRoute = '/account') {
     closeDialog(false);
@@ -725,12 +749,47 @@
     form.onsubmit = event => { event.preventDefault(); const input = form.querySelector('input'); const text = input.value.trim(); if (!text) return; const message = document.createElement('div'); message.className = 'support-message customer'; message.textContent = text; const messages = page.querySelector('.support-messages'); messages.append(message); input.value = ''; messages.scrollTop = messages.scrollHeight; };
     document.body.append(page);
   }
+  function responsibleWelcome() {
+    shell('Responsible Gaming', `<div class="welcome-compliance"></div><div class="welcome-scroll"><div class="welcome-notice"><p>By selecting “I agree all”, you confirm that you:</p><ul><li>Are over 21 years old.</li><li>Are not a government official or Gaming Employment License holder.</li><li>Are not a member of the Philippine Armed Forces or National Police.</li><li>Are not on PAGCOR’s National Database of Restricted Persons.</li><li>Are not playing in an open public place.</li><li>Understand that funds of ineligible players will be forfeited to the Government.</li></ul></div><nav class="welcome-links" aria-label="Responsible gaming resources"><a href="https://osea.pagcor.ph/" target="_blank" rel="noopener noreferrer">Online Self-Exclusion Application Portal.</a><a href="https://www.pagcor.ph/regulatory/responsible-gaming.php" target="_blank" rel="noopener noreferrer">To know more about PAGCOR's Responsible Gaming Program.</a><a href="mailto:RGD@pagcor.ph">For all other Responsible Gaming concerns: RGD@pagcor.ph</a><a href="https://support.pagcor.ph/" target="_blank" rel="noopener noreferrer">Online Gaming Platform Helpdesk</a><a href="https://www.npgh.ph/" target="_blank" rel="noopener noreferrer">NPGH.PH</a></nav></div><div class="confirm-actions"><button type="button" class="ui-btn" id="welcome-leave">Leave</button><button type="button" class="ui-btn primary" id="welcome-agree">I agree all</button></div>`);
+    const marks = document.querySelector('.lobby-compliance').cloneNode(true);
+    marks.classList.remove('lobby-compliance');
+    card.querySelector('.welcome-compliance').append(marks);
+    card.querySelector('.ui-close').remove();
+    card.querySelector('#welcome-agree').onclick = () => closeDialog(false);
+    card.querySelector('#welcome-leave').onclick = () => location.assign('about:blank');
+    card.querySelector('#welcome-agree').focus({preventScroll: true});
+  }
+  function waitForGuestLobby(route) {
+    const enteringGuestLobby = !signed && ['', '/', '/login'].includes(route);
+    if (!enteringGuestLobby) {
+      clearTimeout(guestLoadingTimer);
+      guestLoadingTimer = null;
+      guestLoading.hidden = true;
+      return false;
+    }
+    if (guestLoadingTimer !== null) return true;
+    if (!showGuestLoading) return false;
+
+    showGuestLoading = false;
+    closeDialog(false);
+    const duration = 1000 + Math.floor(Math.random() * 2001);
+    guestLoading.style.setProperty('--guest-loading-duration', `${duration}ms`);
+    guestLoading.hidden = false;
+    guestLoadingTimer = setTimeout(() => {
+      guestLoadingTimer = null;
+      guestLoading.hidden = true;
+      renderRoute();
+      responsibleWelcome();
+    }, duration);
+    return true;
+  }
   function renderRoute() {
     clearInterval(tourneyTimer);
     clearInterval(bagTimer);
     document.querySelectorAll('.support-page').forEach(page => page.remove());
     stage.querySelectorAll('.secondary-page').forEach(page => page.remove());
     const route = location.hash.slice(1);
+    if (waitForGuestLobby(route)) return;
     if(walletOrigin && route.startsWith('/account') && route !== '/account/kyc') walletPage();
     if (route === '/promos') promos();
     else if (route === '/tourney') tourney();
