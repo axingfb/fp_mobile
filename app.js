@@ -5,6 +5,7 @@
   const guestLoading = stage.querySelector('.guest-loading');
   let showGuestLoading = !signed;
   let guestLoadingTimer = null;
+  let showLoginNotice = false;
   let name = localStorage.fpName || 'axing';
   let avatar = localStorage.fpAvatar || 'cream';
   let mode = 'OTP', active = null, card, opener = null;
@@ -104,7 +105,7 @@
     if (restore && opener?.isConnected) opener.focus({preventScroll: true});
   }
   function dismiss() {
-    if (['Responsible Gaming', 'Access Restricted'].includes(overlay.dataset.dialog)) return;
+    if (['Responsible Gaming', 'Access Restricted', 'Notice'].includes(overlay.dataset.dialog)) return;
     if (fromSecurityRequirements && ['#/account/kyc', '#/account/wallet-password'].includes(location.hash)) { fromSecurityRequirements = false; navigate('/account/security-requirements'); return; }
     if (location.hash === '#/account/remove-fund' || location.hash === '#/account/remove-verify') { pendingRemoval = null; navigate('/account'); return; }
     if (location.hash.split('?')[0] === '#/account/transaction-detail') { navigate('/account'); return; }
@@ -177,8 +178,18 @@
       if (!values.phone.trim()) { error.textContent = 'Enter your mobile number.'; return; }
       if (!values[key].trim()) { error.textContent = mode === 'OTP' ? 'Enter your OTP.' : 'Enter your password.'; return; }
       if (/^\d$/.test(values.phone.trim())) { ndrpRestriction(); return; }
-      signed = true; sync(); closeDialog(false); navigate(walletOrigin ? '/wallet?mode=deposit' : '/');
+      signed = true; showLoginNotice = true; sync(); closeDialog(false); navigate(walletOrigin ? '/wallet?mode=deposit' : '/');
     };
+  }
+  function loginNotice() {
+    shell('Notice', `<div class="login-notice"><div class="notice-bell" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 20a2 2 0 0 0 4 0"/></svg></div><p>Playing in open and public places is prohibited !</p><button type="button" class="ui-btn primary notice-agree">Agree</button><div class="notice-compliance"></div></div>`);
+    card.querySelector('.ui-close').remove();
+    const marks = document.querySelector('.lobby-compliance').cloneNode(true);
+    marks.classList.remove('lobby-compliance');
+    card.querySelector('.notice-compliance').append(marks);
+    const agree = card.querySelector('.notice-agree');
+    agree.onclick = () => closeDialog(false);
+    agree.focus({preventScroll: true});
   }
   function ndrpRestriction() {
     signed = false;
@@ -819,6 +830,7 @@
       const item = menuItems.find(([slug]) => route === '/account/' + slug);
       if (item) { accountSection = item[0]; account(); } else closeDialog(false);
     }
+    if (showLoginNotice) { showLoginNotice = false; loginNotice(); }
   }
   document.querySelector('.add-balance').onclick = () => { walletResume=false; navigate('/wallet?mode=deposit'); };
   guest.onclick = () => navigate('/login');

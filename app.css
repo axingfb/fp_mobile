@@ -32,8 +32,11 @@
   animation: guest-loading-progress var(--guest-loading-duration, 1s) linear both;
 }
 @keyframes guest-loading-progress {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+  0% { transform: scaleX(0); animation-timing-function: ease-out; }
+  20% { transform: scaleX(.38); animation-timing-function: ease-in-out; }
+  50% { transform: scaleX(.65); animation-timing-function: ease-out; }
+  75% { transform: scaleX(.82); animation-timing-function: ease-in; }
+  100% { transform: scaleX(1); }
 }
 @media (prefers-reduced-motion: reduce) {
   .guest-loading-fill { animation: none; width: 35%; }
@@ -463,3 +466,12 @@
 .ndrp-contacts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
 .ndrp-contacts a{display:inline-flex;align-items:center;min-height:36px;padding:6px 10px;border:1px solid var(--fp-outline);border-radius:8px;background:var(--fp-pink-surface);color:var(--fp-ink);font-weight:800;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
 .ndrp-contacts a:focus-visible{outline:2px solid var(--fp-ink);outline-offset:2px}
+.ui-overlay[data-dialog="Notice"] .ui-card{width:min(42%,420px)}
+.login-notice{display:flex;flex-direction:column;align-items:center;gap:max(8px,.9cqw);text-align:center}
+.notice-bell{display:grid;place-items:center;width:max(38px,4.8cqw);height:max(38px,4.8cqw);border-radius:50%;background:var(--fp-gold-surface);color:var(--fp-ink);box-shadow:inset 0 1px var(--fp-cream),0 2px var(--fp-outline)}
+.notice-bell svg{width:58%;height:58%}
+.login-notice p{margin:0;font:800 max(14px,1.65cqw)/1.35 var(--fp-font);color:var(--fp-text)}
+.notice-agree{width:100%}
+.notice-compliance .compliance-marks{background:transparent;padding:0;justify-content:center}
+.notice-compliance .compliance-marks img{height:3.5cqw;max-height:34px}
+@media(orientation:portrait){.ui-overlay[data-dialog="Notice"] .ui-card{width:min(90%,420px)}}

@@ -60,6 +60,12 @@ GROUPS = [
     group('login', '登录', [
         scene('otp', 'OTP 登录', '/login', '#field-otp'),
         scene('password', '密码登录', '/login', '#field-password', '.login-tabs [data-mode="Password"]'),
+        scene('notice', '登录后 · Notice', '/login', '.login-notice',
+              ('input', '#field-phone', '09123456789'), ('input', '#field-otp', '123456'),
+              '#submit-login'),
+        scene('ndrp', 'NDRP · Access Restricted', '/login', '.ndrp-message',
+              ('input', '#field-phone', '1'), ('input', '#field-otp', '123456'),
+              '#submit-login'),
         scene('phone-keyboard', '手机号键盘', '/login', '.fp-keyboard-overlay', '#field-phone'),
         scene('otp-keyboard', '验证码键盘', '/login', '.fp-keyboard-overlay', '#field-otp'),
         scene('password-keyboard', '密码键盘', '/login', '.fp-keyboard-overlay',

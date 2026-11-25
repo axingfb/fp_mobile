@@ -31,6 +31,16 @@
           "image": "images/login/password-032766d5d55bb0b5.jpg"
         },
         {
+          "id": "notice",
+          "title": "登录后 · Notice",
+          "image": "images/login/notice-5fad98550e70e898.jpg"
+        },
+        {
+          "id": "ndrp",
+          "title": "NDRP · Access Restricted",
+          "image": "images/login/ndrp-e16774bed4a97efc.jpg"
+        },
+        {
           "id": "phone-keyboard",
           "title": "手机号键盘",
           "image": "images/login/phone-keyboard-2bc463bf5268f871.jpg"
