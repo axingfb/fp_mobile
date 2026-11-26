@@ -31,7 +31,7 @@
     if (Array.isArray(saved)) withdrawalRecords = saved.filter(record => record && typeof record.id === 'string' && typeof record.amount === 'number' && Number.isFinite(record.amount) && record.amount > 0 && ['GCash','Maya','Bank'].includes(record.channel) && record.status === 'Pending' && Number.isFinite(new Date(record.date).getTime())).map(record => ({...record, date: new Date(record.date), type: 'Withdrawal'}));
   } catch { /* An unreadable local history must not prevent opening Wallet. */ }
   const gameRecords = [{game: 'Fortune Treasures', provider: 'PG', status: 'Completed', time: '11/12/2026 14:45:32', bet: 2, win: 0}, {game: 'Super Ace', provider: 'JILI', status: 'Completed', time: '11/12/2026 14:45:21', bet: 2, win: 16}, {game: 'Gold Miner', provider: 'Facai', status: 'Pending', time: '11/12/2026 14:40:00', bet: 5, win: 0}];
-  let responsibleScroll = 0, blockDuration = '15 Days', openTime = null;
+  let responsibleScroll = 0, blockDuration = '15 Days', openTime = null, bettingTimer = null;
   let fromSecurityRequirements = false;
   const fundDraft = {bank: '', first: '', middle: '', last: '', number: ''};
   const fundAccounts = {
@@ -48,6 +48,12 @@
   let savedGaming;
   try { savedGaming = {...gamingDefaults, ...JSON.parse(localStorage.fpResponsibleGaming || '{}')}; } catch { savedGaming = {...gamingDefaults}; }
   let gamingDraft = {...savedGaming};
+  window.addEventListener('filplay:bet-limit-reached', () => {
+    if (savedGaming.lossEnabled && Number(savedGaming.loss) > 0) { savedGaming.bettingSpent = Number(savedGaming.loss); gamingDraft.bettingSpent = savedGaming.bettingSpent; localStorage.fpResponsibleGaming = JSON.stringify(savedGaming); }
+    shell('Betting Limit Reached', `<p class="confirm-message">Bet failed. You have reached your daily betting limit.</p><div class="confirm-actions"><button type="button" class="ui-btn" id="bet-limit-ok">Okay</button><button type="button" class="ui-btn primary" id="bet-limit-settings">View Settings</button></div>`);
+    card.querySelector('#bet-limit-ok').onclick = () => closeDialog();
+    card.querySelector('#bet-limit-settings').onclick = () => { accountSection = 'responsible'; responsibleScroll = 0; navigate('/account'); };
+  });
   const icon = (name, extra = '') => `<img class="ui-icon ${extra}" src="components/ui/icons/${name}.svg" alt="" draggable="false">`;
   const guest = document.createElement('button');
   guest.className = 'guest-login ui-btn primary';
@@ -211,6 +217,7 @@
     card.querySelector('.ndrp-ok').focus({preventScroll: true});
   }
   function account() {
+    clearInterval(bettingTimer);
     shell('Personal Center', `<div class="center-sidebar"><nav class="account-menu" aria-label="Personal center"></nav><button type="button" class="ui-btn account-logout" id="account-logout">${icon('logout')}<span>Log out</span></button></div><main class="center-content" tabindex="0"></main>`);
     overlay.dataset.dialog = 'My account';
     const menu = card.querySelector('.account-menu');
@@ -297,11 +304,17 @@
         const column = (part, count, selected) => `<div class="time-column" role="group" aria-label="${key} ${part}">${Array.from({length: count}, (_, i) => { const n = String(i).padStart(2, '0'); return `<button type="button" class="time-option ${n === selected ? 'selected' : ''}" data-time-part="${part}" data-time-value="${n}" aria-pressed="${n === selected}">${n}</button>`; }).join('')}</div>`;
         return `<div class="time-picker"><div class="time-picker-head"><span>HH</span><span>MM</span></div><div class="time-picker-columns">${column('hour', 24, hour)}${column('minute', 60, minute)}</div><button type="button" class="ui-btn primary time-done">Done</button></div>`;
       };
-      const toggle = (key, label) => `<label class="gaming-switch"><input type="checkbox" role="switch" data-gaming-toggle="${key}" aria-label="${label}" ${gamingDraft[key] ? 'checked' : ''}><span aria-hidden="true"></span></label>`;
+      const bettingActive = Boolean(savedGaming.lossEnabled && Number(savedGaming.loss) > 0 && savedGaming.bettingStartedAt);
+      const toggle = (key, label, disabled = false) => `<label class="gaming-switch"><input type="checkbox" role="switch" data-gaming-toggle="${key}" aria-label="${label}" ${gamingDraft[key] ? 'checked' : ''} ${disabled ? 'disabled' : ''}><span aria-hidden="true"></span></label>`;
+      const bettingSpent = Math.min(Number(savedGaming.loss) || 0, Math.max(0, Number(savedGaming.bettingSpent) || 0));
+      const formatMoney = value => Number(value).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      const removalAt = new Date((savedGaming.bettingStartedAt || 0) + 86400000);
+      const removalDate = `${removalAt.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', hour12:true})} ${removalAt.toLocaleDateString('en-US', {month:'2-digit', day:'2-digit', year:'numeric'})}`;
+      const bettingDetails = bettingActive ? `<div class="gaming-details betting-summary"><div class="betting-progress-label"><span>Betting progress</span><strong>PHP ${formatMoney(bettingSpent)} / ${formatMoney(savedGaming.loss)}</strong></div><div class="betting-progress" role="progressbar" aria-label="Betting progress" aria-valuemin="0" aria-valuemax="${Number(savedGaming.loss)}" aria-valuenow="${bettingSpent}"><span style="width:${bettingSpent / Number(savedGaming.loss) * 100}%"></span></div><div class="betting-footer"><span>Time remaining</span><strong id="betting-countdown"></strong></div><button type="button" class="ui-btn betting-remove" id="betting-remove" disabled>Remove</button><p class="betting-remove-note" id="betting-remove-note">Removal pending after ${removalDate}. The limit remains active until removal is complete.</p></div>` : gamingDraft.lossEnabled ? `<div class="gaming-details"><label class="gaming-money"><span>PHP</span><input class="custom-field" type="text" inputmode="none" autocomplete="off" aria-label="Daily betting limit in PHP" data-gaming-field="loss" value="${gamingDraft.loss}"></label></div>` : '';
       content.innerHTML = `<div class="center-list gaming-list">
         <div class="gaming-item">${row('Daily Gaming Duration', toggle('durationEnabled', 'Daily Gaming Duration'))}${gamingDraft.durationEnabled ? `<div class="gaming-details"><div class="gaming-stepper"><button type="button" class="ui-btn" data-step="-1" aria-label="Decrease hours" ${gamingDraft.hours <= 1 ? 'disabled' : ''}>−</button><span>${gamingDraft.hours} ${gamingDraft.hours === 1 ? 'Hour' : 'Hours'}</span><button type="button" class="ui-btn" data-step="1" aria-label="Increase hours">+</button></div></div>` : ''}</div>
         <div class="gaming-item">${row('Daily Gaming Schedule', toggle('scheduleEnabled', 'Daily Gaming Schedule'))}${gamingDraft.scheduleEnabled ? `<div class="gaming-details"><div class="gaming-times">${['start', 'end'].map(key => `<div class="gaming-time-field"><span>${key === 'start' ? 'Start' : 'End'}</span><button type="button" class="custom-field time-trigger" data-time-trigger="${key}" aria-expanded="${openTime === key}">${gamingDraft[key] || 'Select time'}</button></div>`).join('')}</div>${openTime ? timePicker(openTime) : ''}</div>` : ''}</div>
-        <div class="gaming-item">${row('Daily Loss Limit', toggle('lossEnabled', 'Daily Loss Limit'))}${gamingDraft.lossEnabled ? `<div class="gaming-details"><label class="gaming-money"><span>PHP</span><input class="custom-field" type="text" inputmode="none" autocomplete="off" aria-label="Daily loss limit in PHP" data-gaming-field="loss" value="${gamingDraft.loss}"></label></div>` : ''}</div>
+        <div class="gaming-item">${row('Daily Betting Limit', toggle('lossEnabled', 'Daily Betting Limit', bettingActive))}${bettingDetails}</div>
         <button type="button" class="center-row gaming-block" id="gaming-block"><span>Block My Account</span>${icon('chevron')}</button>
       </div><section class="gaming-help" aria-labelledby="gaming-help-title"><h3 id="gaming-help-title">Need help?</h3><nav class="gaming-help-links" aria-label="Responsible gaming help">${responsibleHelpLinks}</nav><div class="gaming-help-marks" aria-label="Responsible gaming and regulatory information"><a href="https://www.pagcor.ph/" target="_blank" rel="noopener noreferrer" aria-label="PAGCOR"><img src="components/compliance/pagcor.webp" alt="PAGCOR"></a><a href="https://www.npgh.ph/" target="_blank" rel="noopener noreferrer" aria-label="NPGH"><img src="components/compliance/npgh.webp" alt="NPGH"></a><a href="https://www.pagcor.ph/regulatory/responsible-gaming.php" target="_blank" rel="noopener noreferrer" aria-label="Responsible gaming, 21 and above"><img src="components/compliance/age21.webp" alt="21 and above"></a></div></section><div class="gaming-actions"><button type="button" class="ui-btn" id="gaming-cancel">Cancel</button><button type="button" class="ui-btn primary" id="gaming-confirm">Confirm</button></div>`;
       const redraw = () => { const scroll = content.scrollTop; account(); card.querySelector('.center-content').scrollTop = scroll; };
@@ -332,7 +345,40 @@
       content.onscroll = () => { responsibleScroll = content.scrollTop; };
       content.querySelector('#gaming-block').onclick = () => { responsibleScroll = content.scrollTop; navigate('/account/block-confirm'); };
       content.querySelector('#gaming-cancel').onclick = () => { gamingDraft = {...savedGaming}; redraw(); };
-      content.querySelector('#gaming-confirm').onclick = () => { savedGaming = {...gamingDraft}; localStorage.fpResponsibleGaming = JSON.stringify(savedGaming); window.dispatchEvent(new CustomEvent('filplay:responsible-gaming-save', {detail: {...savedGaming}})); toast('Settings saved'); };
+      if (bettingActive) {
+        const updateBettingClock = () => {
+          if (!content.isConnected) { clearInterval(bettingTimer); return; }
+          const elapsed = Date.now() - savedGaming.bettingStartedAt;
+          const remaining = Math.max(0, Math.ceil((86400000 - elapsed) / 1000));
+          content.querySelector('#betting-countdown').textContent = `${String(Math.floor(remaining / 3600)).padStart(2, '0')}:${String(Math.floor(remaining % 3600 / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}`;
+          const wait = Math.max(0, Math.ceil((30000 - elapsed) / 1000));
+          content.querySelector('#betting-remove').disabled = wait > 0;
+          content.querySelector('#betting-remove-note').hidden = wait === 0;
+        };
+        updateBettingClock(); bettingTimer = setInterval(updateBettingClock, 1000);
+        content.querySelector('#betting-remove').onclick = () => {
+          if (Date.now() - savedGaming.bettingStartedAt < 30000) return;
+          Object.assign(savedGaming, {lossEnabled: false, loss: '', bettingStartedAt: null, bettingSpent: 0});
+          Object.assign(gamingDraft, {lossEnabled: false, loss: '', bettingStartedAt: null, bettingSpent: 0});
+          localStorage.fpResponsibleGaming = JSON.stringify(savedGaming);
+          window.dispatchEvent(new CustomEvent('filplay:responsible-gaming-save', {detail: {...savedGaming}}));
+          toast('Betting limit removed'); redraw();
+        };
+      }
+      content.querySelector('#gaming-confirm').onclick = () => {
+        if (gamingDraft.lossEnabled && !(Number(gamingDraft.loss) > 0)) { toast('Enter a betting limit greater than 0'); return; }
+        const save = () => {
+          if (gamingDraft.lossEnabled && !bettingActive) { gamingDraft.bettingStartedAt = Date.now(); gamingDraft.bettingSpent = 0; }
+          savedGaming = {...gamingDraft}; localStorage.fpResponsibleGaming = JSON.stringify(savedGaming);
+          window.dispatchEvent(new CustomEvent('filplay:responsible-gaming-save', {detail: {...savedGaming}})); toast('Settings saved'); account();
+        };
+        if (gamingDraft.lossEnabled && !bettingActive) {
+          shell('Confirm Betting Limit', `<p class="confirm-message">After setting a Daily Betting Limit, you cannot remove it during the 24-hour cooling-off period.</p><div class="confirm-actions"><button type="button" class="ui-btn" id="limit-cancel">Cancel</button><button type="button" class="ui-btn primary" id="limit-confirm">Confirm</button></div>`);
+          card.querySelector('.ui-close').onclick = account;
+          card.querySelector('#limit-cancel').onclick = account;
+          card.querySelector('#limit-confirm').onclick = save;
+        } else save();
+      };
     } else if (accountSection === 'faq') {
       content.innerHTML = faqContent();
     } else if (accountSection === 'about') {
