@@ -19,11 +19,12 @@
   const avatarColors = {cream: '#fff0d6', pink: '#ffc6c4', gold: '#ffe878', blue: '#a8d7ff', mint: '#b8ecd2', lilac: '#dfc9ff'};
   const menuItems = [
     ['account', 'My Account', 'user'], ['funds', 'Fund Accounts', 'wallet'],
-    ['transactions', 'Transactions', 'transactions'], ['responsible', 'Responsible Gaming', 'responsible'],
-    ['settings', 'Settings & Help', 'settings']
+    ['transactions', 'Transactions', 'transactions'], ['faq', 'FAQ', 'help'],
+    ['about', 'About Us', 'user'], ['responsible', 'Responsible Gaming', 'responsible'],
+    ['settings', 'Setting', 'settings']
   ];
   let accountSection = 'account', fundTab = 'GCash', transactionTab = 'Deposit', gameProvider = 'All Games', gamePeriod = 'Today', depositStatus = 'All Status', depositPeriod = 'Last 7 days', withdrawalStatus = 'All Status', withdrawalPeriod = 'Last 7 days', rewardPeriod = 'Last 3 days';
-  let transactionDetail = null, transactionScroll = 0;
+  let transactionDetail = null, transactionScroll = 0, documentInitial = 'terms';
   let withdrawalRecords = [];
   try {
     const saved = JSON.parse(localStorage.fpWithdrawalRecords || '[]');
@@ -111,13 +112,14 @@
     if (restore && opener?.isConnected) opener.focus({preventScroll: true});
   }
   function dismiss() {
+    if (location.hash === '#/account/update-version' && overlay.dataset.requiredUpdate === 'true') return;
     if (['Responsible Gaming', 'Access Restricted', 'Notice'].includes(overlay.dataset.dialog)) return;
     if (fromSecurityRequirements && ['#/account/kyc', '#/account/wallet-password'].includes(location.hash)) { fromSecurityRequirements = false; navigate('/account/security-requirements'); return; }
     if (location.hash === '#/account/remove-fund' || location.hash === '#/account/remove-verify') { pendingRemoval = null; navigate('/account'); return; }
     if (location.hash.split('?')[0] === '#/account/transaction-detail') { navigate('/account'); return; }
     if (location.hash === '#/account/add-fund') { navigate('/account'); return; }
     if (location.hash === '#/account/security-requirements') { navigate('/account'); return; }
-    if (['#/account/block-confirm', '#/account/faq', '#/account/terms', '#/account/fund-verify', '#/account/login-password', '#/account/wallet-password', '#/account/kyc'].includes(location.hash)) { navigate('/account'); return; }
+    if (['#/account/block-confirm', '#/account/faq', '#/account/terms', '#/account/update-version', '#/account/fund-verify', '#/account/login-password', '#/account/wallet-password', '#/account/kyc'].includes(location.hash)) { navigate('/account'); return; }
     closeDialog();
     if(walletOrigin && location.hash === '#/account'){walletOrigin=false;navigate(`/wallet?mode=${walletMode}&channel=${walletChannel}`);return;}
     if (/^#\/(account|login|logout|keyboard)(\/|$)/.test(location.hash)) navigate('/');
@@ -331,12 +333,19 @@
       content.querySelector('#gaming-block').onclick = () => { responsibleScroll = content.scrollTop; navigate('/account/block-confirm'); };
       content.querySelector('#gaming-cancel').onclick = () => { gamingDraft = {...savedGaming}; redraw(); };
       content.querySelector('#gaming-confirm').onclick = () => { savedGaming = {...gamingDraft}; localStorage.fpResponsibleGaming = JSON.stringify(savedGaming); window.dispatchEvent(new CustomEvent('filplay:responsible-gaming-save', {detail: {...savedGaming}})); toast('Settings saved'); };
+    } else if (accountSection === 'faq') {
+      content.innerHTML = faqContent();
+    } else if (accountSection === 'about') {
+      content.innerHTML = `<div class="center-list"><button type="button" class="center-row gaming-block" id="check-version"><span>Update Version</span>${icon('chevron')}</button><button type="button" class="center-row gaming-block" id="open-terms"><span>Terms of Use</span>${icon('chevron')}</button><button type="button" class="center-row gaming-block" id="open-privacy"><span>Privacy Policy</span>${icon('chevron')}</button></div>`;
+      content.querySelector('#check-version').onclick = () => navigate('/account/update-version');
+      content.querySelector('#open-terms').onclick = () => { documentInitial = 'terms'; navigate('/account/terms'); };
+      content.querySelector('#open-privacy').onclick = () => { documentInitial = 'privacy'; navigate('/account/terms'); };
     } else {
       const soundEnabled = localStorage.fpSound !== 'false';
       const soundSwitch = (id, label, checked, disabled = false) => `<label class="gaming-switch"><input type="checkbox" role="switch" id="${id}" aria-label="${label}" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''}><span aria-hidden="true"></span></label>`;
-      content.innerHTML = `<div class="center-group"><h3>Settings</h3><div class="center-list">${row('Sound', soundSwitch('sound-switch', 'Sound', soundEnabled))}<div class="sound-sub">${row('Music', soundSwitch('music-switch', 'Music', soundEnabled && localStorage.fpMusic !== 'false', !soundEnabled))}${row('Sound effects', soundSwitch('effects-switch', 'Sound effects', soundEnabled && localStorage.fpSoundEffects !== 'false', !soundEnabled))}</div></div></div><div class="center-group"><h3>Help</h3><div class="center-list"><button type="button" class="center-row gaming-block" id="open-faq"><span>FAQ</span>${icon('chevron')}</button></div></div><div class="center-group"><h3>Terms</h3><div class="center-list"><button type="button" class="center-row gaming-block" id="open-terms"><span>Terms &amp; Privacy</span>${icon('chevron')}</button></div></div>`;
-      content.querySelector('#open-faq').onclick = () => navigate('/account/faq');
-      content.querySelector('#open-terms').onclick = () => navigate('/account/terms');
+      content.innerHTML = `<div class="center-group"><h3>Settings</h3><div class="center-list">${row('Sound', soundSwitch('sound-switch', 'Sound', soundEnabled))}<div class="sound-sub">${row('Music', soundSwitch('music-switch', 'Music', soundEnabled && localStorage.fpMusic !== 'false', !soundEnabled))}${row('Sound effects', soundSwitch('effects-switch', 'Sound effects', soundEnabled && localStorage.fpSoundEffects !== 'false', !soundEnabled))}</div></div></div><div class="center-group"><h3>Display</h3><div class="center-list">${row('Full Screen', soundSwitch('fullscreen-switch', 'Full Screen', Boolean(document.fullscreenElement)))}</div></div>`;
+      const fullscreen = content.querySelector('#fullscreen-switch');
+      fullscreen.onchange = async () => { try { if (fullscreen.checked) { if (!document.documentElement.requestFullscreen) throw new Error('Unavailable'); await document.documentElement.requestFullscreen(); } else if (document.fullscreenElement) await document.exitFullscreen(); } catch { fullscreen.checked = Boolean(document.fullscreenElement); toast('Full screen is unavailable'); } };
       const sound = content.querySelector('#sound-switch'), music = content.querySelector('#music-switch'), effects = content.querySelector('#effects-switch');
       const publishSound = () => window.dispatchEvent(new CustomEvent('filplay:sound-change', {detail: {enabled: sound.checked, music: music.checked, effects: effects.checked}}));
       sound.onchange = () => { localStorage.fpSound = String(sound.checked); music.checked = effects.checked = sound.checked; music.disabled = effects.disabled = !sound.checked; localStorage.fpMusic = localStorage.fpSoundEffects = String(sound.checked); publishSound(); };
@@ -454,15 +463,14 @@
       closeAccountFlow(); toast('Password set in prototype');
     };
   }
-  function faq() {
-    shell('FAQ', `<article class="faq-content">
+  function faqContent() {
+    return `<article class="faq-content">
       <section><h3>Requirements to Register a Filplay Account</h3><p>To create an account, players must meet these requirements:</p><p><strong>1. Understand Terms and Policies</strong> — Read and comply with Filplay's terms, conditions and operating policies.</p><p><strong>2. Provide Accurate Information</strong> — Submit genuine personal details. Fake identities and impersonation are prohibited.</p><p><strong>3. One Account Per Player</strong> — Each player may have one account. Check that you have not registered before.</p><p><strong>4. Verification Process</strong> — Complete the required verification to activate your account.</p></section>
       <section><h3>Step-by-Step Guide to Log in to Filplay</h3><p><strong>Step 1: Access the Filplay Website</strong><br>Visit www.filplay.com and select “Login / Register”.</p><p><strong>Step 2: Enter your phone number</strong><br>Enter your mobile number, read the terms of use and privacy policy, and agree to them before continuing.</p><p><strong>Step 3: Enter the One-Time Pin (OTP)</strong><br>Enter the OTP sent to your phone. Once registration is confirmed, log in to start playing.</p><p><strong>Optional: Update Login Preferences</strong><br>After registration, you can choose to use a password instead of an OTP.</p></section>
       <section><h3>KYC Process</h3><p>Complete KYC for full access to the platform and cash-in/cash-out services. Provide the requested personal and contact details, check that they are accurate, and enter the verification code.</p></section>
       <section><h3>Step-by-Step Guide to Deposit</h3><ol><li>Open Wallet and select Deposit to see payment methods.</li><li>Enter an initial deposit of at least P500.00.</li><li>Choose the relevant options and continue to the payment gateway.</li><li>After a successful transaction, the amount is credited to your wallet and you receive a notification.</li></ol></section>
       <section><h3>Step-by-Step Guide to Withdraw</h3><ol><li>Open Wallet and select Withdraw.</li><li>If needed, add an account to receive the withdrawal.</li><li>Enter the requested first, middle and last names and account number accurately.</li></ol></section>
-    </article>`);
-    card.querySelector('.ui-close').onclick = () => navigate('/account');
+    </article>`;
   }
   function terms() {
     const documents = {terms: `<article class="faq-content terms-content" role="tabpanel" id="document-panel" aria-labelledby="document-terms"><p class="terms-note">Summary for this prototype. <a href="https://filplay.com/docs/terms-of-use" target="_blank" rel="noopener noreferrer">Read the full Terms of Use</a>.</p>
@@ -491,8 +499,37 @@
       card.querySelectorAll('[data-document]').forEach(button => { const selected = button.dataset.document === key; button.classList.toggle('selected', selected); button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1; });
     };
     card.querySelectorAll('[data-document]').forEach(button => { button.onclick = () => activate(button.dataset.document); button.onkeydown = event => { if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return; event.preventDefault(); const target = button.dataset.document === 'terms' ? 'privacy' : 'terms'; activate(target); card.querySelector(`[data-document="${target}"]`).focus(); }; });
-    activate('terms');
+    activate(documentInitial);
+    documentInitial = 'terms';
     card.querySelector('.ui-close').onclick = () => navigate('/account');
+  }
+  function updateVersion() {
+    const state = ['current', 'optional', 'required'][Math.floor(Math.random() * 3)];
+    const current = state === 'current', required = state === 'required';
+    const title = current ? 'Up to Date' : 'New Version';
+    const message = current ? 'You are using the latest version.' : required ? 'A new version is required to continue.' : 'A new version is available.';
+    shell(title, `<div class="update-version"><p class="confirm-message">${message}</p>${current ? '<div class="confirm-actions"><button type="button" class="ui-btn primary" id="version-done">Okay</button></div>' : `<div class="version-notes"><strong>What's new</strong><ol><li>Faster game loading</li><li>Improved account security</li><li>Updated transaction records</li><li>Performance and stability improvements</li></ol></div><div class="confirm-actions">${required ? '' : '<button type="button" class="ui-btn" id="version-later">Later</button>'}<button type="button" class="ui-btn primary" id="version-install">Update</button></div>`}</div>`);
+    overlay.dataset.requiredUpdate = String(required);
+    const back = () => navigate('/account');
+    if (required) card.querySelector('.ui-close').remove();
+    else card.querySelector('.ui-close').onclick = back;
+    const done = card.querySelector('#version-done'), later = card.querySelector('#version-later'), install = card.querySelector('#version-install');
+    if (done) done.onclick = back;
+    if (later) later.onclick = back;
+    if (install) install.onclick = () => {
+      const view = card.querySelector('.update-version');
+      overlay.dataset.requiredUpdate = 'true';
+      card.querySelector('.ui-close')?.remove();
+      view.innerHTML = `<p class="confirm-message" id="download-label">Downloading APK</p><div class="download-track" role="progressbar" aria-label="APK download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="download-fill"></div></div><p class="download-percent" aria-live="polite">0%</p>`;
+      const track = view.querySelector('.download-track'), fill = view.querySelector('.download-fill'), percent = view.querySelector('.download-percent');
+      let progress = 0;
+      const timer = setInterval(() => {
+        if (!view.isConnected || location.hash !== '#/account/update-version') { clearInterval(timer); return; }
+        progress = Math.min(100, progress + 5);
+        track.setAttribute('aria-valuenow', String(progress)); fill.style.width = `${progress}%`; percent.textContent = `${progress}%`;
+        if (progress === 100) { clearInterval(timer); view.querySelector('#download-label').textContent = 'Download complete'; view.insertAdjacentHTML('beforeend', '<div class="confirm-actions"><button type="button" class="ui-btn primary" id="download-done">Done</button></div>'); view.querySelector('#download-done').onclick = back; }
+      }, 180);
+    };
   }
   function blockAccount() {
     const options = ['7 Days', '15 Days', '30 Days', '90 Days', 'Until manually unlocked'];
@@ -825,8 +862,9 @@
     else if (route === '/account/kyc') kyc();
     else if (route === '/account/login-password') passwordDialog(false);
     else if (route === '/account/wallet-password') passwordDialog(true);
-    else if (route === '/account/faq') faq();
+    else if (route === '/account/faq') { accountSection = 'faq'; account(); }
     else if (route === '/account/terms') terms();
+    else if (route === '/account/update-version') updateVersion();
     else if (route === '/account/nickname') { accountSection = 'account'; navigate('/account'); }
     else if (route === '/account/avatar') avatars();
     else if (route === '/login') login();
@@ -858,6 +896,7 @@
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
   });
+  document.addEventListener('fullscreenchange', () => { const toggle = overlay.querySelector('#fullscreen-switch'); if (toggle) toggle.checked = Boolean(document.fullscreenElement); });
   window.addEventListener('hashchange', renderRoute);
   renderRoute();
 })();
