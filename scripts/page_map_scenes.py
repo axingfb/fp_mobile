@@ -58,6 +58,8 @@ GROUPS = [
         scene('guest', '访客大厅', '/', '.guest-login', ('storage', 'fpSigned', 'false')),
     ]),
     group('login', '登录', [
+        scene('responsible-welcome', '登录前 · Responsible Gaming', '/', '.welcome-scroll',
+              ('storage', 'fpSigned', 'false')),
         scene('otp', 'OTP 登录', '/login', '#field-otp'),
         scene('password', '密码登录', '/login', '#field-password', '.login-tabs [data-mode="Password"]'),
         scene('notice', '登录后 · Notice', '/login', '.login-notice',

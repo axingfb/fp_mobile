@@ -475,3 +475,6 @@
 .notice-compliance .compliance-marks{background:transparent;padding:0;justify-content:center}
 .notice-compliance .compliance-marks img{height:3.5cqw;max-height:34px}
 @media(orientation:portrait){.ui-overlay[data-dialog="Notice"] .ui-card{width:min(90%,420px)}}
+.gaming-help-links div,.welcome-links div{padding:6px 0;color:var(--fp-text);font:700 max(12px,1.3cqw)/1.4 var(--fp-font);overflow-wrap:anywhere}
+.gaming-help-links div+div{border-top:1px solid #b8614e24}
+.gaming-help-links div a{display:inline;min-height:0;padding:0;font:inherit;font-weight:800}

@@ -21,6 +21,11 @@
       "name": "登录",
       "screens": [
         {
+          "id": "responsible-welcome",
+          "title": "登录前 · Responsible Gaming",
+          "image": "images/login/responsible-welcome-cb7f0ea1651b5e7e.jpg"
+        },
+        {
           "id": "otp",
           "title": "OTP 登录",
           "image": "images/login/otp-77cf12e2d6afe428.jpg"
@@ -189,7 +194,7 @@
         {
           "id": "responsible",
           "title": "Responsible Gaming",
-          "image": "images/account/responsible-963f0c8f86ffa409.jpg"
+          "image": "images/account/responsible-96d81ce07cfe1539.jpg"
         },
         {
           "id": "gaming-schedule",
